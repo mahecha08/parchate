@@ -2,10 +2,18 @@ package com.universidad.parchate.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Fondo oscuro principal
+val BackgroundPrincipal = Color(0xFF1E1C32)
+
+// Rosa neón principal para texto, bordes y botones
+val RosadoNeon = Color(0xFFFF5277)
+
+// Rosa pálido para el efecto de de fondo
+val RosadoNeonBack = Color(0xFFFB9BAD)
+
+// Color para el texto secundario (gris claro)
+val TextoSecundario = Color(0xFF8E8EA8)
+
+// Color de los iconos dentro de los campos de texto
+val IconColor = Color(0xFFFF5277)

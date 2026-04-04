@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    // agregado
+    alias(libs.plugins.jetbrainsKotlinSerialization)
 }
 
 android {
@@ -53,4 +55,10 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    // agregadads
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
+    implementation("androidx.compose.material:material-icons-extended")
+
 }

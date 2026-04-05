@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     // agregado
     alias(libs.plugins.jetbrainsKotlinSerialization)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -60,5 +61,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation("androidx.compose.material:material-icons-extended")
+    implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+
+
 
 }

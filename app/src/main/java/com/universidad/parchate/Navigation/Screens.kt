@@ -7,3 +7,6 @@ object Inicio
 
 @Serializable
 object Login
+
+@Serializable
+object Home

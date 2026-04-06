@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.universidad.parchate.ui.screens.Home.HomeScreen
 import com.universidad.parchate.ui.screens.start.StartScreen
 import com.universidad.parchate.ui.screens.Login.LoginScreen
 
@@ -17,7 +18,14 @@ fun NavigationPantallas() {
             )
         }
         composable<Login> {
-            LoginScreen()
+            LoginScreen(
+                navigationToHome = { navController.navigate(Home){
+                    popUpTo(Login){inclusive=true}
+                } }
+            )
+        }
+        composable<Home> {
+            HomeScreen()
         }
     }
 }

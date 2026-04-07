@@ -38,16 +38,16 @@ fun cajasTexto(
         keyboardOptions = keyboardOptions,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp), // Margen responsive
-        shape = RoundedCornerShape(20.dp), // Bordes redondeados
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent, // Sin fondo al estar enfocado
-            unfocusedContainerColor = Color.Transparent, // Sin fondo al estar desenfocado
-            focusedIndicatorColor = RosadoNeon, // Borde neón enfocado
-            unfocusedIndicatorColor = RosadoNeon.copy(alpha = 0.5f), // Borde suave desenfocado
-            cursorColor = RosadoNeon, // Cursor rosa
-            focusedTextColor = Color.White, // Texto blanco al escribir
-            unfocusedTextColor = Color.White // Texto blanco al escribir
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            focusedIndicatorColor = RosadoNeon,
+            unfocusedIndicatorColor = RosadoNeon.copy(alpha = 0.5f),
+            cursorColor = RosadoNeon,
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White
         )
     )
 }

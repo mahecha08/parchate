@@ -36,8 +36,9 @@ import com.google.firebase.auth.auth
 
 @Composable
 fun LoginScreen(
+    navigationToRegister: () -> Unit = {},
     navigationToHome: () -> Unit = {},
-    navigationToRegister: () -> Unit = {}
+    onNavigateToback:() -> Unit,
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -109,7 +110,9 @@ fun LoginScreen(
                     loginError,
                     textAlign = TextAlign.Center,
                     color = Color(0xFFDFCB7A),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
                 )}
 
                 glowButton(
@@ -134,7 +137,9 @@ fun LoginScreen(
 
 
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -148,7 +153,7 @@ fun LoginScreen(
                     ) {
                         Text("¿No tienes cuenta? ", color = TextoSecundario)
                         TextButton(
-                            onClick = navigationToRegister,
+                            onClick = { navigationToRegister() },
                             contentPadding = PaddingValues(0.dp)
                         ) {
                             Text("Registrate", color = RosadoNeon )

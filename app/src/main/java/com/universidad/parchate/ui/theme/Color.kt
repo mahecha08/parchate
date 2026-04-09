@@ -17,3 +17,8 @@ val TextoSecundario = Color(0xFF8E8EA8)
 
 // Color de los iconos dentro de los campos de texto
 val IconColor = Color(0xFFFF5277)
+
+val Encabezado = Color(0xFF272746)
+
+// Color para progreso faltante
+val ProgressMissing = Color(0xFF5D2E37)

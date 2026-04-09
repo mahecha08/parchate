@@ -10,3 +10,9 @@ object Login
 
 @Serializable
 object Home
+
+@Serializable
+object Registration
+
+@Serializable
+object Policy

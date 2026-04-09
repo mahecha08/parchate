@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -20,10 +21,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
+import com.universidad.parchate.data.service.FirebaseService
 import com.universidad.parchate.ui.components.cajasTexto
 import com.universidad.parchate.ui.components.glowButton
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.theme.TextoSecundario
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(
@@ -39,10 +43,16 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var terminosAceptados by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
     val cumpleLongitud = password.length >= 8
     val cumpleMayuscula = password.any { it.isUpperCase() }
     val cumpleEspecial = password.any { !it.isLetterOrDigit() }
     val coinciden = password == confirmPassword && password.isNotEmpty()
+
+    val firebaseService = remember { FirebaseService() }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -170,14 +180,48 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        glowButton(
-            text = "CONTINUAR",
-            onClick = {
-                if (coinciden && cumpleLongitud && cumpleMayuscula && cumpleEspecial && terminosAceptados) {
+        if (errorMessage.isNotEmpty()) {
+            Text(
+                errorMessage,
+                color = Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(horizontal = 32.dp)
+            )
+        }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (isLoading) {
+            CircularProgressIndicator(color = RosadoNeon)
+        } else {
+            glowButton(
+                text = "CONTINUAR",
+                onClick = {
+                    if (coinciden && cumpleLongitud && cumpleMayuscula && cumpleEspecial && terminosAceptados) {
+                        isLoading = true
+                        errorMessage = ""
+                        scope.launch {
+                            val result = firebaseService.registerUser(
+                                email = correo,
+                                password = password,
+                                nombres = nombres,
+                                cedula = cedula,
+                                fechaNacimiento = fechaNacimiento
+                            )
+                            isLoading = false
+                            result.fold(
+                                onSuccess = {
+                                    onNavigateToLogin()
+                                },
+                                onFailure = { e ->
+                                    errorMessage = e.message ?: "Error al registrar"
+                                }
+                            )
+                        }
+                    }
                 }
-            }
-        )
+            )
+        }
 
         Text(
             text = "¿Ya tienes cuenta? Iniciar Sesión",

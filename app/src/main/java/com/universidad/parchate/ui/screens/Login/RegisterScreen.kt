@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -21,12 +20,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import com.universidad.parchate.data.service.FirebaseService
 import com.universidad.parchate.ui.components.cajasTexto
 import com.universidad.parchate.ui.components.glowButton
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.theme.TextoSecundario
+import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import kotlinx.coroutines.launch
 
 @Composable
@@ -45,6 +44,7 @@ fun RegisterScreen(
     var terminosAceptados by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var successMessage by remember { mutableStateOf("") }
 
     val cumpleLongitud = password.length >= 8
     val cumpleMayuscula = password.any { it.isUpperCase() }
@@ -53,18 +53,19 @@ fun RegisterScreen(
 
     val firebaseService = remember { FirebaseService() }
     val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF1B172E))
-            .verticalScroll(rememberScrollState())
+            .background(BackgroundPrincipal)
+            .verticalScroll(scrollState)
     ) {
         IconButton(
             onClick = onNavigateBack,
             modifier = Modifier.padding(top = 40.dp, start = 8.dp)
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = RosadoNeon)
+            Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = RosadoNeon)
         }
 
         Text(
@@ -74,7 +75,6 @@ fun RegisterScreen(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
         )
-
 
         cajasTexto(
             value = nombres,
@@ -97,7 +97,7 @@ fun RegisterScreen(
 
         cajasTexto(
             value = fechaNacimiento,
-            onValueChange = { if (it.all { char -> char.isDigit() || char == '/' }) fechaNacimiento = it },
+            onValueChange = { fechaNacimiento = it },
             label = "Fecha de Nacimiento (DD/MM/AAAA)",
             leadingIcon = Icons.Default.DateRange,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -114,7 +114,6 @@ fun RegisterScreen(
         )
 
         Spacer(modifier = Modifier.height(12.dp))
-
 
         cajasTexto(
             value = password,
@@ -155,16 +154,6 @@ fun RegisterScreen(
             }
         )
 
-        if (confirmPassword.isNotEmpty() && !coinciden) {
-            Text(
-                "Las contraseñas no coinciden",
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
-        }
-
-
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -177,50 +166,53 @@ fun RegisterScreen(
             Text("Acepto los términos y condiciones", color = TextoSecundario, fontSize = 14.sp)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-
         if (errorMessage.isNotEmpty()) {
-            Text(
-                errorMessage,
-                color = Color.Red,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
+            Text(errorMessage, color = Color.Red, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 32.dp))
+        }
+
+        if (successMessage.isNotEmpty()) {
+            Text(successMessage, color = Color.Green, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 32.dp))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (isLoading) {
-            CircularProgressIndicator(color = RosadoNeon)
-        } else {
-            glowButton(
-                text = "CONTINUAR",
-                onClick = {
-                    if (coinciden && cumpleLongitud && cumpleMayuscula && cumpleEspecial && terminosAceptados) {
-                        isLoading = true
-                        errorMessage = ""
-                        scope.launch {
-                            val result = firebaseService.registerUser(
-                                email = correo,
-                                password = password,
-                                nombres = nombres,
-                                cedula = cedula,
-                                fechaNacimiento = fechaNacimiento
-                            )
-                            isLoading = false
-                            result.fold(
-                                onSuccess = {
-                                    onNavigateToLogin()
-                                },
-                                onFailure = { e ->
-                                    errorMessage = e.message ?: "Error al registrar"
-                                }
-                            )
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            if (isLoading) {
+                CircularProgressIndicator(color = RosadoNeon)
+            } else {
+                glowButton(
+                    text = "CONTINUAR",
+                    onClick = {
+                        if (coinciden && cumpleLongitud && cumpleMayuscula && cumpleEspecial && terminosAceptados) {
+                            isLoading = true
+                            errorMessage = ""
+                            scope.launch {
+                                val result = firebaseService.registerUser(
+                                    email = correo.trim(),
+                                    password = password.trim(),
+                                    nombres = nombres,
+                                    cedula = cedula,
+                                    fechaNacimiento = fechaNacimiento
+                                )
+                                isLoading = false
+                                result.fold(
+                                    onSuccess = {
+                                        successMessage = "¡Registro exitoso! Verifica tu correo."
+                                        onNavigateToLogin()
+                                    },
+                                    onFailure = { e ->
+                                        errorMessage = e.message ?: "Error al registrar"
+                                    }
+                                )
+                            }
+                        } else if (!terminosAceptados) {
+                            errorMessage = "Debes aceptar los términos"
+                        } else {
+                            errorMessage = "Revisa los requisitos de la contraseña"
                         }
                     }
-                }
-            )
+                )
+            }
         }
 
         Text(
@@ -235,10 +227,12 @@ fun RegisterScreen(
         )
     }
 }
-
 @Composable
 fun ValidacionItem(texto: String, esValido: Boolean) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 2.dp)
+    ) {
         Icon(
             imageVector = if (esValido) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
             contentDescription = null,
@@ -246,6 +240,10 @@ fun ValidacionItem(texto: String, esValido: Boolean) {
             modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(texto, color = if (esValido) Color.Green else TextoSecundario, fontSize = 12.sp)
+        Text(
+            text = texto,
+            color = if (esValido) Color.Green else TextoSecundario,
+            fontSize = 12.sp
+        )
     }
 }

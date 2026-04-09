@@ -20,19 +20,26 @@ class FirebaseService {
         fechaNacimiento: String
     ): Result<User> {
         return try {
-            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+            // 1. Crear usuario en Firebase Auth
+            val authResult = auth.createUserWithEmailAndPassword(email.trim(), password.trim()).await()
             val user = authResult.user
 
             if (user != null) {
+                // 2. Enviar correo de verificación (Para validar que es humano/real)
+                user.sendEmailVerification().await()
+
+                // 3. Guardar datos en Firestore
                 val userData = User(
                     uid = user.uid,
                     nombres = nombres,
                     cedula = cedula,
                     fechaNacimiento = fechaNacimiento,
-                    correo = email
+                    correo = email.trim()
                 )
-
                 db.collection("users").document(user.uid).set(userData).await()
+
+                // 4. Cerrar sesión para forzar el login tras verificar
+                auth.signOut()
 
                 Result.success(userData)
             } else {

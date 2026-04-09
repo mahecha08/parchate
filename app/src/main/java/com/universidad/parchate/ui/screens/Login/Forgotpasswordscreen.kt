@@ -44,7 +44,7 @@ fun ForgotPasswordScreen(
     val auth = Firebase.auth
     val scrollState = rememberScrollState()
 
-    Box(modifier = Modifier.fillMaxSize().background(BackgroundPrincipal)) {
+    Column (modifier = Modifier.fillMaxSize().background(BackgroundPrincipal)) {
         IconButton(
             onClick = onNavigateBack,
             modifier = Modifier.padding(16.dp).statusBarsPadding()

@@ -1,3 +1,78 @@
 <resources>
     <string name="app_name">parchate</string>
+    <string name="start_title">PARCHATE </string>
+
+    <string name="login_header">PARCHATE</string>
+    <string name="login_correo">Correo Electronico</string>
+    <string name="login_contraseña"> Contraseña</string>
+    <string name="login_loginbutton">INICIAR SESIÓN</string>
+    <string name="login_olvidarpass">¿Olvidaste tu contraseña?</string>
+    <string name="login_nocuenta">¿No tienes cuenta? </string>
+    <string name="login_registrate">Regístrate</string>
+    <string name="login_errorEmailNoVerificado">Por favor verifica tu correo electrónico antes de ingresar.</string>
+    <string name="login_errorCredenciales">Credenciales inválidas. Revisa correo y contraseña.</string>
+    <string name="login_errorNoRegistrado">Este usuario no está registrado.</string>
+    <string name="login_errorConexion">Error de conexión. Inténtalo de nuevo.</string>
+    <string name="login_errorCamposIncompletos">Por favor completa todos los campos.</string>
+
+    <!-- RegisterScreen -->
+    <string name="register_titulo">Regístrate en Parchate</string>
+    <string name="register_nombres">Nombres y Apellidos</string>
+    <string name="register_cedula">Cédula</string>
+    <string name="register_fecha_nacimiento">Fecha de Nacimiento (DD/MM/AAAA)</string>
+    <string name="register_correo">Correo Electrónico</string>
+    <string name="register_contrasena">Contraseña</string>
+    <string name="register_contrasena_requisito">Tu contraseña debe tener:</string>
+    <string name="register_contrasena_minimo">Mínimo 8 caracteres</string>
+    <string name="register_contrasena_mayuscula">Una letra mayúscula</string>
+    <string name="register_contrasena_especial">Un carácter especial</string>
+    <string name="register_confirmar_contrasena">Confirmar Contraseña</string>
+    <string name="register_terminos">Acepto los términos y condiciones</string>
+    <string name="register_exito">¡Registro exitoso! Verifica tu correo.</string>
+    <string name="register_error_terminos">Debes aceptar los términos</string>
+    <string name="register_error_contrasena">Revisa los requisitos de la contraseña</string>
+    <string name="register_error_registro">Error al registrar</string>
+    <string name="register_continuar">CONTINUAR</string>
+    <string name="register_yacuenta">¿Ya tienes cuenta? Iniciar Sesión</string>
+    <string name="register_atras">Atrás</string>
+
+    <!-- ForgotPasswordScreen -->
+    <string name="forgot_titulo">¿Olvidaste tu contraseña?</string>
+    <string name="forgot_correo_metodo">Correo</string>
+    <string name="forgot_telefono_metodo">Teléfono</string>
+    <string name="forgot_enviar_enlace">ENVIAR ENLACE</string>
+    <string name="forgot_enviar_codigo">ENVIAR CÓDIGO</string>
+    <string name="forgot_ingresa_correo">Ingresa tu correo</string>
+    <string name="forgot_ingresa_telefono">Ingresa tu teléfono</string>
+    <string name="forgot_volver">Volver</string>
+    <string name="forgot_correo_label">Correo Electrónico</string>
+    <string name="forgot_telefono_label">Número (+57…)</string>
+
+    <!-- VerificationCodeScreen -->
+    <string name="verification_revisa_correo">Revisa tu correo</string>
+    <string name="verification_verifica_telefono">Verifica tu número</string>
+    <string name="verification_enlace_enviado">Hemos enviado un enlace de restablecimiento a:</string>
+    <string name="verification_codigo_enviado">Ingresa el código de 6 dígitos enviado a:</string>
+    <string name="verification_instrucciones_email">Abre el enlace en el correo para crear tu nueva contraseña. Luego vuelve aquí para iniciar sesión.</string>
+    <string name="verification_check_spam">Revisa también tu carpeta de spam</string>
+    <string name="verification_enlace_expira">El enlace expira en 1 hora</string>
+    <string name="verification_enlace_uso">Solo puedes usar el enlace una vez</string>
+    <string name="verification_ya_lo_hice">YA LO HICE – INICIAR SESIÓN</string>
+    <string name="verification_error_automatico">Error en la verificación automática</string>
+    <string name="verification_error_sms">Error al enviar SMS: Inténtalo de nuevo</string>
+    <string name="verification_codigo_enviado_exito">Código enviado a %1$s</string>
+    <string name="verification_correo_reenviado">✓ Correo reenviado a %1$s</string>
+    <string name="verification_error_reenviar">Error al reenviar. Inténtalo más tarde.</string>
+    <string name="verification_no_llego_correo">¿No llegó el correo? Reenviar</string>
+    <string name="verification_espera_sms">Espera mientras se envía el SMS…</string>
+    <string name="verification_ingresa_digitos">Ingresa los 6 dígitos del código</string>
+    <string name="verification_error_id">Error: no se recibió el ID de verificación</string>
+    <string name="verification_codigo_incorrecto">Código incorrecto. Inténtalo de nuevo.</string>
+    <string name="verification_codigo_expiro">El código ha expirado. Reenvíalo.</string>
+    <string name="verification_error_verificar">Error al verificar. Inténtalo de nuevo.</string>
+    <string name="verification_no_llego_sms">¿No llegó el SMS? Reenviar</string>
+    <string name="verification_verificar_codigo">VERIFICAR CÓDIGO</string>
+
+    <!-- HomeScreen -->
+    <string name="home_saludo">Hola en el home de inicio</string>
 </resources>

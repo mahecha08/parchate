@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -27,6 +28,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.auth
+import com.universidad.parchate.R
 import com.universidad.parchate.ui.components.cajasTexto
 import com.universidad.parchate.ui.components.glowButton
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
@@ -50,6 +52,13 @@ fun LoginScreen(
     val auth = Firebase.auth
     val activity = LocalView.current.context as Activity
 
+    // Capturar strings antes de callbacks
+    val errorEmailNoVerificado = stringResource(R.string.login_errorEmailNoVerificado)
+    val errorCredenciales = stringResource(R.string.login_errorCredenciales)
+    val errorNoRegistrado = stringResource(R.string.login_errorNoRegistrado)
+    val errorConexion = stringResource(R.string.login_errorConexion)
+    val errorCamposIncompletos = stringResource(R.string.login_errorCamposIncompletos)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -66,7 +75,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "PARCHATE",
+                text = stringResource(R.string.login_header),
                 color = RosadoNeon,
                 fontSize = 40.sp,
                 modifier = Modifier.padding(vertical = 32.dp)
@@ -83,7 +92,7 @@ fun LoginScreen(
                 cajasTexto(
                     value = email,
                     onValueChange = { email = it },
-                    label = "Correo Electrónico",
+                    label = stringResource(R.string.login_correo),
                     leadingIcon = Icons.Default.Email,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
@@ -92,7 +101,7 @@ fun LoginScreen(
                 cajasTexto(
                     value = password,
                     onValueChange = { password = it },
-                    label = "Contraseña",
+                    label = stringResource(R.string.login_contraseña),
                     leadingIcon = Icons.Default.Lock,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -124,7 +133,7 @@ fun LoginScreen(
                     CircularProgressIndicator(color = RosadoNeon)
                 } else {
                     glowButton(
-                        text = "INICIAR SESIÓN",
+                        text = stringResource(R.string.login_loginbutton),
                         onClick = {
                             if (email.isNotBlank() && password.isNotBlank()) {
                                 isLoading = true
@@ -139,19 +148,19 @@ fun LoginScreen(
                                             if (user != null && user.isEmailVerified) {
                                                 navigationToHome()
                                             } else {
-                                                loginError = "Por favor verifica tu correo electrónico antes de ingresar."
+                                                loginError = errorEmailNoVerificado
                                                 auth.signOut()
                                             }
                                         } else {
                                             loginError = when (task.exception) {
-                                                is FirebaseAuthInvalidCredentialsException -> "Credenciales inválidas. Revisa correo y contraseña."
-                                                is FirebaseAuthInvalidUserException -> "Este usuario no está registrado."
-                                                else -> "Error de conexión. Inténtalo de nuevo."
+                                                is FirebaseAuthInvalidCredentialsException -> errorCredenciales
+                                                is FirebaseAuthInvalidUserException -> errorNoRegistrado
+                                                else -> errorConexion
                                             }
                                         }
                                     }
                             } else {
-                                loginError = "Por favor completa todos los campos."
+                                loginError = errorCamposIncompletos
                             }
                         }
                     )
@@ -167,7 +176,7 @@ fun LoginScreen(
                 ) {
                     TextButton(onClick = onNavigateToForgotPassword) {
                         Text(
-                            text = "¿Olvidaste tu contraseña?",
+                            text = stringResource(R.string.login_olvidarpass),
                             color = TextoSecundario,
                             fontSize = 14.sp
                         )
@@ -175,14 +184,14 @@ fun LoginScreen(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 8.dp)
+                        modifier = Modifier.padding(top = 8.dp,).padding(horizontal = 6.dp)
                     ) {
-                        Text("¿No tienes cuenta? ", color = TextoSecundario, fontSize = 14.sp)
+                        Text(stringResource(R.string.login_nocuenta), color = TextoSecundario, fontSize = 14.sp)
                         TextButton(
                             onClick = { navigationToRegister() },
                             contentPadding = PaddingValues(0.dp)
                         ) {
-                            Text("Regístrate", color = RosadoNeon, fontSize = 14.sp)
+                            Text(stringResource(R.string.login_registrate), color = RosadoNeon, fontSize = 14.sp)
                         }
                     }
                 }

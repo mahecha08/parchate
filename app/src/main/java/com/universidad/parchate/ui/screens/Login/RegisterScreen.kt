@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardOptions
+import com.universidad.parchate.R
 import com.universidad.parchate.data.service.FirebaseService
 import com.universidad.parchate.ui.components.cajasTexto
 import com.universidad.parchate.ui.components.glowButton
@@ -55,6 +57,12 @@ fun RegisterScreen(
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
+    // Capturar strings antes de callbacks
+    val registroExito = stringResource(R.string.register_exito)
+    val errorRegistro = stringResource(R.string.register_error_registro)
+    val errorTerminos = stringResource(R.string.register_error_terminos)
+    val errorContrasena = stringResource(R.string.register_error_contrasena)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -65,11 +73,11 @@ fun RegisterScreen(
             onClick = onNavigateBack,
             modifier = Modifier.padding(top = 40.dp, start = 8.dp)
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Atrás", tint = RosadoNeon)
+            Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.register_atras), tint = RosadoNeon)
         }
 
         Text(
-            text = "Regístrate en Parchate",
+            text = stringResource(R.string.register_titulo),
             color = RosadoNeon,
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
@@ -79,7 +87,7 @@ fun RegisterScreen(
         cajasTexto(
             value = nombres,
             onValueChange = { nombres = it },
-            label = "Nombres y Apellidos",
+            label = stringResource(R.string.register_nombres),
             leadingIcon = Icons.Default.Person
         )
 
@@ -88,7 +96,7 @@ fun RegisterScreen(
         cajasTexto(
             value = cedula,
             onValueChange = { if (it.all { char -> char.isDigit() }) cedula = it },
-            label = "Cédula",
+            label = stringResource(R.string.register_cedula),
             leadingIcon = Icons.Default.Badge,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -98,7 +106,7 @@ fun RegisterScreen(
         cajasTexto(
             value = fechaNacimiento,
             onValueChange = { fechaNacimiento = it },
-            label = "Fecha de Nacimiento (DD/MM/AAAA)",
+            label = stringResource(R.string.register_fecha_nacimiento),
             leadingIcon = Icons.Default.DateRange,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -108,7 +116,7 @@ fun RegisterScreen(
         cajasTexto(
             value = correo,
             onValueChange = { correo = it },
-            label = "Correo Electrónico",
+            label = stringResource(R.string.register_correo),
             leadingIcon = Icons.Default.Email,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
@@ -118,7 +126,7 @@ fun RegisterScreen(
         cajasTexto(
             value = password,
             onValueChange = { password = it },
-            label = "Contraseña",
+            label = stringResource(R.string.register_contrasena),
             leadingIcon = Icons.Default.Lock,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
@@ -132,16 +140,16 @@ fun RegisterScreen(
         )
 
         Column(modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)) {
-            Text("Tu contraseña debe tener:", color = Color.White, fontSize = 12.sp)
-            ValidacionItem("Mínimo 8 caracteres", cumpleLongitud)
-            ValidacionItem("Una letra mayúscula", cumpleMayuscula)
-            ValidacionItem("Un carácter especial", cumpleEspecial)
+            Text(stringResource(R.string.register_contrasena_requisito), color = Color.White, fontSize = 12.sp)
+            ValidacionItem(stringResource(R.string.register_contrasena_minimo), cumpleLongitud)
+            ValidacionItem(stringResource(R.string.register_contrasena_mayuscula), cumpleMayuscula)
+            ValidacionItem(stringResource(R.string.register_contrasena_especial), cumpleEspecial)
         }
 
         cajasTexto(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = "Confirmar Contraseña",
+            label = stringResource(R.string.register_confirmar_contrasena),
             leadingIcon = Icons.Default.Lock,
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
@@ -163,7 +171,7 @@ fun RegisterScreen(
                 onCheckedChange = { terminosAceptados = it },
                 colors = CheckboxDefaults.colors(checkedColor = RosadoNeon, uncheckedColor = TextoSecundario)
             )
-            Text("Acepto los términos y condiciones", color = TextoSecundario, fontSize = 14.sp)
+            Text(stringResource(R.string.register_terminos), color = TextoSecundario, fontSize = 14.sp)
         }
 
         if (errorMessage.isNotEmpty()) {
@@ -181,7 +189,7 @@ fun RegisterScreen(
                 CircularProgressIndicator(color = RosadoNeon)
             } else {
                 glowButton(
-                    text = "CONTINUAR",
+                    text = stringResource(R.string.register_continuar),
                     onClick = {
                         if (coinciden && cumpleLongitud && cumpleMayuscula && cumpleEspecial && terminosAceptados) {
                             isLoading = true
@@ -197,18 +205,18 @@ fun RegisterScreen(
                                 isLoading = false
                                 result.fold(
                                     onSuccess = {
-                                        successMessage = "¡Registro exitoso! Verifica tu correo."
+                                        successMessage = registroExito
                                         onNavigateToLogin()
                                     },
                                     onFailure = { e ->
-                                        errorMessage = e.message ?: "Error al registrar"
+                                        errorMessage = e.message ?: errorRegistro
                                     }
                                 )
                             }
                         } else if (!terminosAceptados) {
-                            errorMessage = "Debes aceptar los términos"
+                            errorMessage = errorTerminos
                         } else {
-                            errorMessage = "Revisa los requisitos de la contraseña"
+                            errorMessage = errorContrasena
                         }
                     }
                 )
@@ -216,7 +224,7 @@ fun RegisterScreen(
         }
 
         Text(
-            text = "¿Ya tienes cuenta? Iniciar Sesión",
+            text = stringResource(R.string.register_yacuenta),
             color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()

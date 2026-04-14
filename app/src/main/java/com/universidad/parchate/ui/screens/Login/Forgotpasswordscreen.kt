@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.universidad.parchate.R
 import com.universidad.parchate.ui.components.cajasTexto
 import com.universidad.parchate.ui.components.glowButton
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
@@ -44,12 +46,16 @@ fun ForgotPasswordScreen(
     val auth = Firebase.auth
     val scrollState = rememberScrollState()
 
+    // Capturar strings antes de usarlas en callbacks
+    val ingresaCorreo = stringResource(R.string.forgot_ingresa_correo)
+    val ingresaTelefono = stringResource(R.string.forgot_ingresa_telefono)
+
     Column (modifier = Modifier.fillMaxSize().background(BackgroundPrincipal)) {
         IconButton(
             onClick = onNavigateBack,
             modifier = Modifier.padding(16.dp).statusBarsPadding()
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = RosadoNeon)
+            Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.forgot_volver), tint = RosadoNeon)
         }
 
         Column(
@@ -59,14 +65,14 @@ fun ForgotPasswordScreen(
         ) {
             Text(text = "PARCHATE", color = RosadoNeon, fontSize = 36.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "¿Olvidaste tu contraseña?", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+            Text(text = stringResource(R.string.forgot_titulo), color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(32.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                MethodCard(selected = selectedMethod == 1, label = "Correo",
+                MethodCard(selected = selectedMethod == 1, label = stringResource(R.string.forgot_correo_metodo),
                     icon = { Icon(Icons.Default.Email, null, tint = if (selectedMethod == 1) Color.White else TextoSecundario) },
                     onClick = { selectedMethod = 1; message = "" }, modifier = Modifier.weight(1f))
-                MethodCard(selected = selectedMethod == 2, label = "Teléfono",
+                MethodCard(selected = selectedMethod == 2, label = stringResource(R.string.forgot_telefono_metodo),
                     icon = { Icon(Icons.Default.Phone, null, tint = if (selectedMethod == 2) Color.White else TextoSecundario) },
                     onClick = { selectedMethod = 2; message = "" }, modifier = Modifier.weight(1f))
             }
@@ -75,10 +81,19 @@ fun ForgotPasswordScreen(
 
             when (selectedMethod) {
                 1 -> {
-                    cajasTexto(value = email, onValueChange = { email = it }, label = "Correo Electrónico", leadingIcon = Icons.Default.Email, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email))
+                    cajasTexto(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = stringResource(R.string.forgot_correo_label),
+                        leadingIcon = Icons.Default.Email,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email))
                 }
                 2 -> {
-                    cajasTexto(value = phone, onValueChange = { phone = it }, label = "Número (+57...)", leadingIcon = Icons.Default.Phone, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone))
+                    cajasTexto(value = phone,
+                        onValueChange = { phone = it },
+                        label = stringResource(R.string.forgot_telefono_label),
+                        leadingIcon = Icons.Default.Phone,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone))
                 }
             }
 
@@ -94,10 +109,10 @@ fun ForgotPasswordScreen(
                     CircularProgressIndicator(color = RosadoNeon)
                 } else {
                     glowButton(
-                        text = if (selectedMethod == 1) "ENVIAR ENLACE" else "ENVIAR CÓDIGO",
+                        text = if (selectedMethod == 1) stringResource(R.string.forgot_enviar_enlace) else stringResource(R.string.forgot_enviar_codigo),
                         onClick = {
                             if (selectedMethod == 1) {
-                                if (email.isBlank()) { message = "Ingresa tu correo"; isError = true }
+                                if (email.isBlank()) { message = ingresaCorreo; isError = true }
                                 else {
                                     isLoading = true
                                     auth.sendPasswordResetEmail(email.trim())
@@ -105,7 +120,7 @@ fun ForgotPasswordScreen(
                                         .addOnFailureListener { e -> message = "Error: ${e.localizedMessage}"; isError = true; isLoading = false }
                                 }
                             } else {
-                                if (phone.isBlank()) { message = "Ingresa tu teléfono"; isError = true }
+                                if (phone.isBlank()) { message = ingresaTelefono; isError = true }
                                 else { onNavigateToVerification("phone", phone.trim()) }
                             }
                         }

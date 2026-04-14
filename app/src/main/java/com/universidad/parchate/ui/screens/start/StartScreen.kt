@@ -6,19 +6,33 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.common.internal.StringResourceValueReader
+import com.universidad.parchate.R
 import com.universidad.parchate.viewmodel.StartViewModel
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import com.universidad.parchate.ui.theme.RosadoNeon
+import kotlinx.coroutines.delay
 
 @Composable
 fun StartScreen(navigationToLogin:() -> Unit, viewModel: StartViewModel = viewModel()) {
     val fondoPrincipal = Color(0xFF1A1A2E)
     val rosadoBotones = Color(0xFFE94560)
+
+    LaunchedEffect(Unit) {
+        delay(2000)
+        navigationToLogin()
+    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = fondoPrincipal) {
         Column(
@@ -31,18 +45,11 @@ fun StartScreen(navigationToLogin:() -> Unit, viewModel: StartViewModel = viewMo
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text("PARCHATE", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
+            Text(text = stringResource(R.string.start_title), color = RosadoNeon, fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
 
             Spacer(modifier = Modifier.height(100.dp))
 
-            Button(
-                onClick = { navigationToLogin() },
-                colors = ButtonDefaults.buttonColors(containerColor = rosadoBotones),
-                modifier = Modifier.fillMaxWidth(0.8f).height(55.dp),
-                shape = RoundedCornerShape(25.dp)
-            ) {
-                Text("PARCHATE", color = Color.White, fontSize = 18.sp)
-            }
+
         }
     }
 }

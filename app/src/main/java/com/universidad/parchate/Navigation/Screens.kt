@@ -17,6 +17,7 @@ object Register
 @Serializable
 object ForgotPassword
 
+
 @Serializable
 data class VerificationCode(
     val method: String,   // "email" o "phone"

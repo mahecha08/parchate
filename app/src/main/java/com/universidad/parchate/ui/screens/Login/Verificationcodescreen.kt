@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -30,6 +31,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.universidad.parchate.R
 import com.universidad.parchate.ui.components.glowButton
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
@@ -62,6 +64,23 @@ fun VerificationCodeScreen(
     var message by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
 
+    // Capturar strings fuera del callback
+    val errorAutomatico = stringResource(R.string.verification_error_automatico)
+    val errorSms = stringResource(R.string.verification_error_sms)
+    val codigoEnviadoExito = stringResource(R.string.verification_codigo_enviado_exito, contact)
+    val yaLoHice = stringResource(R.string.verification_ya_lo_hice)
+    val correoReenviado = stringResource(R.string.verification_correo_reenviado, contact)
+    val errorReenviar = stringResource(R.string.verification_error_reenviar)
+    val noLlegoCorreo = stringResource(R.string.verification_no_llego_correo)
+    val esperarSms = stringResource(R.string.verification_espera_sms)
+    val ingresaDigitos = stringResource(R.string.verification_ingresa_digitos)
+    val errorId = stringResource(R.string.verification_error_id)
+    val codigoIncorrecto = stringResource(R.string.verification_codigo_incorrecto)
+    val codigoExpiro = stringResource(R.string.verification_codigo_expiro)
+    val errorVerificar = stringResource(R.string.verification_error_verificar)
+    val noLlegoSms = stringResource(R.string.verification_no_llego_sms)
+    val verificarCodigo = stringResource(R.string.verification_verificar_codigo)
+
     // Estado para flujo SMS
     var verificationId by remember { mutableStateOf("") }
     var smsSent by remember { mutableStateOf(false) }
@@ -76,14 +95,14 @@ fun VerificationCodeScreen(
                     .addOnFailureListener {
                         isLoading = false
                         isError = true
-                        message = "Error en la verificación automática"
+                        message = errorAutomatico
                     }
             }
 
             override fun onVerificationFailed(e: FirebaseException) {
                 isLoading = false
                 isError = true
-                message = "Error al enviar SMS: ${e.localizedMessage ?: "Inténtalo de nuevo"}"
+                message = errorSms
             }
 
             override fun onCodeSent(vId: String, token: PhoneAuthProvider.ForceResendingToken) {
@@ -92,7 +111,7 @@ fun VerificationCodeScreen(
                 smsSent = true
                 isLoading = false
                 isError = false
-                message = "Código enviado a $contact"
+                message = codigoEnviadoExito
             }
         }
     }
@@ -126,7 +145,7 @@ fun VerificationCodeScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Volver",
+                contentDescription = stringResource(R.string.forgot_volver),
                 tint = RosadoNeon
             )
         }
@@ -152,7 +171,7 @@ fun VerificationCodeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = if (isEmail) "Revisa tu correo" else "Verifica tu número",
+                text = if (isEmail) stringResource(R.string.verification_revisa_correo) else stringResource(R.string.verification_verifica_telefono),
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -163,9 +182,9 @@ fun VerificationCodeScreen(
 
             Text(
                 text = if (isEmail)
-                    "Hemos enviado un enlace de restablecimiento a:"
+                    stringResource(R.string.verification_enlace_enviado)
                 else
-                    "Ingresa el código de 6 dígitos enviado a:",
+                    stringResource(R.string.verification_codigo_enviado),
                 color = TextoSecundario,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
@@ -186,7 +205,7 @@ fun VerificationCodeScreen(
             if (isEmail) {
                 // --- FLUJO EMAIL ---
                 Text(
-                    text = "Abre el enlace en el correo para crear tu nueva contraseña. Luego vuelve aquí para iniciar sesión.",
+                    text = stringResource(R.string.verification_instrucciones_email),
                     color = TextoSecundario,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center,
@@ -197,9 +216,9 @@ fun VerificationCodeScreen(
 
                 InfoCard(
                     items = listOf(
-                        "Revisa también tu carpeta de spam",
-                        "El enlace expira en 1 hora",
-                        "Solo puedes usar el enlace una vez"
+                        stringResource(R.string.verification_check_spam),
+                        stringResource(R.string.verification_enlace_expira),
+                        stringResource(R.string.verification_enlace_uso)
                     )
                 )
 
@@ -216,7 +235,7 @@ fun VerificationCodeScreen(
                 }
 
                 glowButton(
-                    text = "YA LO HICE – INICIAR SESIÓN",
+                    text = yaLoHice,
                     onClick = onVerified
                 )
 
@@ -232,15 +251,15 @@ fun VerificationCodeScreen(
                             .addOnSuccessListener {
                                 isLoading = false
                                 isError = false
-                                message = "✓ Correo reenviado a $contact"
+                                message = correoReenviado
                             }
                             .addOnFailureListener {
                                 isLoading = false
                                 isError = true
-                                message = "Error al reenviar. Inténtalo más tarde."
+                                message = errorReenviar
                             }
                     }) {
-                        Text("¿No llegó el correo? Reenviar", color = RosadoNeon, fontSize = 14.sp)
+                        Text(noLlegoCorreo, color = RosadoNeon, fontSize = 14.sp)
                     }
                 }
 
@@ -267,19 +286,19 @@ fun VerificationCodeScreen(
                     CircularProgressIndicator(color = RosadoNeon)
                 } else {
                     glowButton(
-                        text = "VERIFICAR CÓDIGO",
+                        text = verificarCodigo,
                         onClick = {
                             when {
                                 !smsSent -> {
-                                    message = "Espera mientras se envía el SMS..."
+                                    message = esperarSms
                                     isError = true
                                 }
                                 code.length < 6 -> {
-                                    message = "Ingresa los 6 dígitos del código"
+                                    message = ingresaDigitos
                                     isError = true
                                 }
                                 verificationId.isEmpty() -> {
-                                    message = "Error: no se recibió el ID de verificación"
+                                    message = errorId
                                     isError = true
                                 }
                                 else -> {
@@ -292,11 +311,9 @@ fun VerificationCodeScreen(
                                             isLoading = false
                                             isError = true
                                             message = when {
-                                                e.message?.contains("invalid") == true ->
-                                                    "Código incorrecto. Inténtalo de nuevo."
-                                                e.message?.contains("expired") == true ->
-                                                    "El código ha expirado. Reenvíalo."
-                                                else -> "Error al verificar. Inténtalo de nuevo."
+                                                e.message?.contains("invalid") == true -> codigoIncorrecto
+                                                e.message?.contains("expired") == true -> codigoExpiro
+                                                else -> errorVerificar
                                             }
                                         }
                                 }
@@ -320,7 +337,7 @@ fun VerificationCodeScreen(
                                 .build()
                         )
                     }) {
-                        Text("¿No llegó el SMS? Reenviar", color = RosadoNeon, fontSize = 14.sp)
+                        Text(noLlegoSms, color = RosadoNeon, fontSize = 14.sp)
                     }
                 }
             }

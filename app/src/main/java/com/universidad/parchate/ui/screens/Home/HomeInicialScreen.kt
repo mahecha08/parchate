@@ -1,6 +1,5 @@
 package com.universidad.parchate.ui.screens.Home
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,8 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.universidad.parchate.R
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
 
 
@@ -28,7 +29,7 @@ fun HomeScreen(){
         contentAlignment = Alignment.Center
     ) {
         Column() {
-            Text("Hola en el home de inicio")
+            Text(stringResource(R.string.home_saludo))
             TextAlign.Center
 
 

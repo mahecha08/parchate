@@ -10,6 +10,7 @@ import com.universidad.parchate.ui.screens.Login.ForgotPasswordScreen
 import com.universidad.parchate.ui.screens.Login.LoginScreen
 import com.universidad.parchate.ui.screens.Login.RegisterScreen
 import com.universidad.parchate.ui.screens.Login.VerificationCodeScreen
+import com.universidad.parchate.ui.screens.create.CreateEventScreen
 import com.universidad.parchate.ui.screens.start.StartScreen
 
 @Composable
@@ -43,7 +44,11 @@ fun NavigationPantallas() {
         }
 
         composable<Home> {
-            HomeScreen()
+            HomeScreen(
+                onNavigateToCreate = {
+                    navController.navigate(CreateEvent)
+                }
+            )
         }
 
         composable<Register> {
@@ -75,6 +80,16 @@ fun NavigationPantallas() {
                 onVerified = {
                     navController.navigate(Login) {
                         popUpTo(Inicio) { inclusive = false }
+                    }
+                }
+            )
+        }
+        composable<CreateEvent> {
+            CreateEventScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToHome = {
+                    navController.navigate(Home) {
+                        popUpTo(Home) { inclusive = true }
                     }
                 }
             )

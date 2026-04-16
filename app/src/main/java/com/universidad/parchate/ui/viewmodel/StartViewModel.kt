@@ -1,4 +1,4 @@
-package com.universidad.parchate.viewmodel
+package com.universidad.parchate.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 

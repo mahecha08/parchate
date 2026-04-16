@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "422610618079",
-    "project_id": "parchate-1c828",
-    "storage_bucket": "parchate-1c828.firebasestorage.app"
+    "project_number": "997189363048",
+    "project_id": "parchate-5ac5d",
+    "storage_bucket": "parchate-5ac5d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:422610618079:android:8008e5348704cda5844b6a",
+        "mobilesdk_app_id": "1:997189363048:android:7d557e343b3cd1429822dd",
         "android_client_info": {
           "package_name": "com.universidad.parchate"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAs920PhzZE28uf95swC7WFLVydySx3Mm8"
+          "current_key": "AIzaSyCBjruR6TKoiBVymsl9IzCyhRuuZKvlNos"
         }
       ],
       "services": {

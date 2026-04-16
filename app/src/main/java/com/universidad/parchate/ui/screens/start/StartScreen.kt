@@ -3,7 +3,6 @@ package com.universidad.parchate.ui.screens.start
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,12 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.gms.common.internal.StringResourceValueReader
 import com.universidad.parchate.R
-import com.universidad.parchate.viewmodel.StartViewModel
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import com.universidad.parchate.ui.viewmodel.StartViewModel
 import com.universidad.parchate.ui.theme.RosadoNeon
 import kotlinx.coroutines.delay
 

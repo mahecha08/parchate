@@ -51,12 +51,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.universidad.parchate.R
 import com.universidad.parchate.ui.components.TimePickerCaja
 import com.universidad.parchate.ui.components.cajasTexto
 import com.universidad.parchate.ui.components.glowButton
 import com.universidad.parchate.ui.theme.IconColor
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.viewmodel.CreateEventViewModel
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.text.KeyboardOptions
 
 private val categorias = listOf("Concierto", "Festival", "Teatro", "Feria", "Cultural", "Deportes", "Tecnología")
@@ -77,17 +79,18 @@ fun CreateEventScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF1B172E))
+            .padding(vertical = 10.dp)
             .verticalScroll(rememberScrollState())
     ) {
         IconButton(
             onClick = onNavigateBack,
-            modifier = Modifier.padding(top = 40.dp, start = 8.dp)
+            modifier = Modifier.padding(top = 40.dp, start = 8.dp).padding(vertical = 20.dp)
         ) {
             Icon(Icons.Default.ArrowBack, contentDescription = null, tint = RosadoNeon)
         }
 
         Text(
-            text = "Registra tu\nEvento",
+            text = stringResource(R.string.create_titulo),
             color = RosadoNeon,
             fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
@@ -99,7 +102,7 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.titulo,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(titulo = it) } },
-            label = "Título del evento",
+            label = stringResource(R.string.create_titulo_evento),
             leadingIcon = Icons.Default.Festival
         )
 
@@ -113,7 +116,7 @@ fun CreateEventScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         SimpleSelector(
-            title = "Categoría",
+            title = stringResource(R.string.create_categoria),
             options = categorias,
             selected = uiState.categoria,
             onSelected = { value -> viewModel.onFieldChange { it.copy(categoria = value) } }
@@ -124,7 +127,7 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.fecha,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(fecha = it) } },
-            label = "Fecha del evento (AAAA-MM-DD)",
+            label = stringResource(R.string.create_fecha_evento),
             leadingIcon = Icons.Default.DateRange,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -134,7 +137,7 @@ fun CreateEventScreen(
         TimePickerCaja(
             value = uiState.hora,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(hora = it) } },
-            label = "Hora del evento (HH:MM)"
+            label = stringResource(R.string.create_hora_evento)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -142,7 +145,7 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.ubicacion,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(ubicacion = it) } },
-            label = "Lugar del evento",
+            label = stringResource(R.string.create_lugar_evento),
             leadingIcon = Icons.Default.LocationOn,
             trailingIcon = { Icon(Icons.Default.Map, contentDescription = null, tint = IconColor) }
         )
@@ -152,7 +155,7 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.direccion,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(direccion = it) } },
-            label = "Dirección",
+            label = stringResource(R.string.create_direccion),
             leadingIcon = Icons.Default.Map
         )
 
@@ -161,13 +164,13 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.ciudad,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(ciudad = it) } },
-            label = "Ciudad"
+            label = stringResource(R.string.create_ciudad)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         SimpleSelector(
-            title = "Modalidad",
+            title = stringResource(R.string.create_modalidad),
             options = modalidades,
             selected = uiState.modalidad,
             onSelected = { value -> viewModel.onFieldChange { it.copy(modalidad = value) } }
@@ -178,7 +181,7 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.descripcion,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(descripcion = it) } },
-            label = "Descripción",
+            label = stringResource(R.string.create_descripcion),
             leadingIcon = Icons.Default.Description,
             modifier = Modifier.height(120.dp)
         )
@@ -188,7 +191,7 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.organizadorNombre,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(organizadorNombre = it) } },
-            label = "Nombre del organizador",
+            label = stringResource(R.string.create_nombre_organizador),
             leadingIcon = Icons.Default.Person
         )
 
@@ -197,7 +200,7 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.contactoOrganizador,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(contactoOrganizador = it) } },
-            label = "Contacto del organizador",
+            label = stringResource(R.string.create_contacto_organizador),
             leadingIcon = Icons.Default.Phone
         )
 
@@ -206,7 +209,7 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.capacidad,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(capacidad = it.filter(Char::isDigit)) } },
-            label = "Capacidad máxima",
+            label = stringResource(R.string.create_capacidad_maxima),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
@@ -215,7 +218,7 @@ fun CreateEventScreen(
         cajasTexto(
             value = uiState.etiquetas,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(etiquetas = it) } },
-            label = "Etiquetas separadas por coma"
+            label = stringResource(R.string.create_etiquetas)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -236,7 +239,7 @@ fun CreateEventScreen(
                         }
                     }
                 )
-                Text("Evento gratuito", color = Color.White)
+                Text(stringResource(R.string.create_evento_gratuito), color = Color.White)
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -247,7 +250,7 @@ fun CreateEventScreen(
                     }
                 )
                 Icon(Icons.Default.Star, contentDescription = null, tint = RosadoNeon)
-                Text("Destacado", color = Color.White)
+                Text(stringResource(R.string.create_destacado), color = Color.White)
             }
         }
 
@@ -256,7 +259,7 @@ fun CreateEventScreen(
             cajasTexto(
                 value = uiState.precio,
                 onValueChange = { viewModel.onFieldChange { current -> current.copy(precio = it) } },
-                label = "Precio",
+                label = stringResource(R.string.create_precio),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
@@ -291,7 +294,7 @@ fun CreateEventScreen(
             }
         } else {
             glowButton(
-                text = "REGISTRAR EVENTO",
+                text = stringResource(R.string.create_registrar_evento),
                 onClick = {
                     viewModel.saveEvent(onSuccess = onNavigateToHome)
                 }
@@ -320,7 +323,7 @@ private fun ImageSelector(
         if (imageUri != null) {
             AsyncImage(
                 model = imageUri,
-                contentDescription = "Imagen del evento",
+                contentDescription = stringResource(R.string.create_imagen_evento),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -328,7 +331,7 @@ private fun ImageSelector(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, tint = RosadoNeon, modifier = Modifier.size(40.dp))
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Cargar Imagen", color = RosadoNeon, fontSize = 14.sp)
+                Text(stringResource(R.string.create_cargar_imagen), color = RosadoNeon, fontSize = 14.sp)
             }
         }
     }

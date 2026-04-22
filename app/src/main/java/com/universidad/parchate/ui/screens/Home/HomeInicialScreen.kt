@@ -41,10 +41,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.universidad.parchate.R
 import com.universidad.parchate.ui.components.EventCard
 import com.universidad.parchate.ui.components.cajasTexto
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
@@ -58,6 +60,7 @@ private val modalidades = listOf("Todas", "presencial", "online")
 fun HomeScreen(
     onNavigateToCreate: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {},
     viewModel: HomeViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -67,7 +70,8 @@ fun HomeScreen(
         bottomBar = {
             BottomNavParchate(
                 onAddClick = onNavigateToCreate,
-                onMapClick = onNavigateToMap
+                onMapClick = onNavigateToMap,
+                onProfileClick = onNavigateToProfile
             )
         },
         containerColor = BackgroundPrincipal
@@ -85,7 +89,7 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "PARCHATE", color = RosadoNeon, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.home_titulo), color = RosadoNeon, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -94,7 +98,7 @@ fun HomeScreen(
                     onValueChange = { value ->
                         viewModel.updateFilters { current -> current.copy(search = value) }
                     },
-                    label = "Buscar eventos...",
+                    label = stringResource(R.string.home_buscar_eventos),
                     leadingIcon = Icons.Default.Search,
                     modifier = Modifier.weight(1f)
                 )
@@ -106,7 +110,7 @@ fun HomeScreen(
 
             if (showFilters) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = "Filtros", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                Text(text = stringResource(R.string.home_filtros), color = Color.White, style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 LazyColumn(
@@ -147,7 +151,7 @@ fun HomeScreen(
                             onValueChange = { city ->
                                 viewModel.updateFilters { it.copy(ciudad = city) }
                             },
-                            label = "Filtrar por ciudad"
+                            label = stringResource(R.string.home_filtrar_ciudad)
                         )
                     }
                     item {
@@ -166,7 +170,7 @@ fun HomeScreen(
                                 onClick = {
                                     viewModel.updateFilters { it.copy(soloGratis = !it.soloGratis) }
                                 },
-                                label = { Text("Solo gratis") }
+                                label = { Text(stringResource(R.string.home_solo_gratis)) }
                             )
                         }
                     }
@@ -190,7 +194,7 @@ fun HomeScreen(
 
                 uiState.filteredEvents.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "No hay eventos con esos filtros", color = Color.White)
+                        Text(text = stringResource(R.string.home_no_eventos), color = Color.White)
                     }
                 }
 
@@ -238,7 +242,7 @@ fun BottomNavParchate(
             icon = {
                 Icon(
                     imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Crear Evento",
+                    contentDescription = stringResource(R.string.home_crear_evento),
                     tint = Color.White
                 )
             },

@@ -10,6 +10,8 @@ import com.universidad.parchate.ui.screens.Login.ForgotPasswordScreen
 import com.universidad.parchate.ui.screens.Login.LoginScreen
 import com.universidad.parchate.ui.screens.Login.RegisterScreen
 import com.universidad.parchate.ui.screens.Login.VerificationCodeScreen
+import com.universidad.parchate.ui.screens.Profile.ProfileScreen
+import com.universidad.parchate.ui.screens.Profile.EditProfileScreen
 import com.universidad.parchate.ui.screens.create.CreateEventScreen
 import com.universidad.parchate.ui.screens.start.StartScreen
 
@@ -47,6 +49,9 @@ fun NavigationPantallas() {
             HomeScreen(
                 onNavigateToCreate = {
                     navController.navigate(CreateEvent)
+                },
+                onNavigateToProfile = {
+                    navController.navigate(Profile)
                 }
             )
         }
@@ -92,6 +97,30 @@ fun NavigationPantallas() {
                         popUpTo(Home) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable<Profile> {
+            ProfileScreen(
+                onNavigateToHome = {
+                    navController.navigate(Home) {
+                        popUpTo(Home) { inclusive = true }
+                    }
+                },
+                onNavitageToEdit = { navController.navigate(EditProfile) },
+                onNavigateToEvents = { },
+                onNavigateToChangePassword = { },
+                onNavigateToStart = {
+                    navController.navigate(Inicio) {
+                        popUpTo(Inicio) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable<EditProfile> {
+            EditProfileScreen(
+                OnNavigateToProfile = {navController.navigate(Profile)}
             )
         }
     }

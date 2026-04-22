@@ -41,7 +41,7 @@ fun StartScreen(navigationToLogin:() -> Unit, viewModel: StartViewModel = viewMo
         verticalArrangement = Arrangement.Center
     ) {
         Image(painterResource(R.drawable.logo),
-            contentDescription = "logo",
+            contentDescription = stringResource(R.string.logo_descripcion),
             modifier = Modifier.size(700.dp))
 
         Spacer(modifier = Modifier.height(20.dp))

@@ -26,3 +26,9 @@ data class VerificationCode(
 
 @Serializable
 object  CreateEvent
+
+@Serializable
+object Profile
+
+@Serializable
+object EditProfile

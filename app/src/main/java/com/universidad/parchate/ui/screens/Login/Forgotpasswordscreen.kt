@@ -63,7 +63,7 @@ fun ForgotPasswordScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = "PARCHATE", color = RosadoNeon, fontSize = 36.sp, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.forgot_parchate), color = RosadoNeon, fontSize = 36.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = stringResource(R.string.forgot_titulo), color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(32.dp))

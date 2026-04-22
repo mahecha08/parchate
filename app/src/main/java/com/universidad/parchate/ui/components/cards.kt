@@ -112,7 +112,7 @@ fun EventCard(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = if (evento.gratis) "Gratis" else "$ ${evento.precio.toInt()}",
+                        text = if (evento.gratis) "Gratis" else "$ ${evento.precio?.toInt() ?: 0}",
                         color = Color.White,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium

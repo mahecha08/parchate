@@ -102,6 +102,48 @@ class EventRepository(
             Result.failure(e)
         }
     }
+    suspend fun getEventById(eventId: String): Result<Evento?> {
+        return try {
+            val document = eventsCollection.document(eventId).get().await()
+            val event = document.toObject(Evento::class.java)?.copy(id = document.id)
+            Result.success(event)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateEvent(eventId: String, request: CreateEventRequest): Result<Boolean> {
+        return try {
+            val updates = mutableMapOf<String, Any>(
+                "titulo" to request.titulo.trim(),
+                "descripcion" to request.descripcion.trim(),
+                "categoria" to request.categoria.trim(),
+                "fecha" to request.fecha.trim(),
+                "hora" to request.hora.trim(),
+                "ubicacion" to request.ubicacion.trim(),
+                "direccion" to request.direccion.trim(),
+                "ciudad" to request.ciudad.trim(),
+                "precio" to if (request.gratis) 0.0 else request.precio,
+                "gratis" to request.gratis,
+                "modalidad" to request.modalidad.trim(),
+                "organizadorNombre" to request.organizadorNombre.trim(),
+                "contactoOrganizador" to request.contactoOrganizador.trim(),
+                "capacidad" to request.capacidad,
+                "etiquetas" to request.etiquetas,
+                "destacado" to request.destacado,
+                "updatedAt" to Timestamp.now()
+            )
+            request.imageUri?.let { uri ->
+                val newImageUrl = uploadEventImage(eventId, uri)
+                updates["imagenUrl"] = newImageUrl
+            }
+
+            eventsCollection.document(eventId).update(updates).await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     private suspend fun uploadEventImage(eventId: String, imageUri: Uri): String {
         val extension = imageUri.lastPathSegment?.substringAfterLast('.', "jpg") ?: "jpg"
@@ -113,7 +155,30 @@ class EventRepository(
         imageRef.putFile(imageUri).await()
         return imageRef.downloadUrl.await().toString()
     }
+    fun observeMyEvents(organizadorId: String): Flow<Result<List<Evento>>> = callbackFlow {
+        val subscription = firestore.collection("eventos")
+            .whereEqualTo("organizadorId", organizadorId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Result.failure(error))
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val events = snapshot.toObjects(Evento::class.java)
+                    trySend(Result.success(events))
+                }
+            }
+        awaitClose { subscription.remove() }
+    }
 
+    suspend fun deleteEvent(eventId: String): Result<Boolean> {
+        return try {
+            firestore.collection("eventos").document(eventId).delete().await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
     companion object {
         const val COLLECTION_EVENTS = "eventos"
     }

@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.universidad.parchate" />
-                  <option name="mobileSdkAppId" value="1:422610618079:android:8008e5348704cda5844b6a" />
-                  <option name="projectId" value="parchate-1c828" />
-                  <option name="projectNumber" value="422610618079" />
+                  <option name="mobileSdkAppId" value="1:997189363048:android:7d557e343b3cd1429822dd" />
+                  <option name="projectId" value="parchate-5ac5d" />
+                  <option name="projectNumber" value="997189363048" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

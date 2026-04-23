@@ -5,6 +5,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.universidad.parchate.ui.screens.Event.MyEventsScreen
+import com.universidad.parchate.ui.screens.Event.UpdateEventScreen
 import com.universidad.parchate.ui.screens.Home.HomeScreen
 import com.universidad.parchate.ui.screens.Login.ForgotPasswordScreen
 import com.universidad.parchate.ui.screens.Login.LoginScreen
@@ -108,7 +110,7 @@ fun NavigationPantallas() {
                     }
                 },
                 onNavitageToEdit = { navController.navigate(EditProfile) },
-                onNavigateToEvents = { },
+                onNavigateToEvents = { navController.navigate(ViewMyEvents) },
                 onNavigateToChangePassword = { },
                 onNavigateToStart = {
                     navController.navigate(Inicio) {
@@ -123,5 +125,24 @@ fun NavigationPantallas() {
                 OnNavigateToProfile = {navController.navigate(Profile)}
             )
         }
+
+        composable<UpdateEvent> { backStackEntry ->
+            val args = backStackEntry.toRoute<UpdateEvent>()
+            UpdateEventScreen(
+                eventId = args.eventId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<ViewMyEvents> {
+            MyEventsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { eventId ->
+                    navController.navigate(UpdateEvent(eventId = eventId))
+                }
+            )
+        }
+
+
     }
 }

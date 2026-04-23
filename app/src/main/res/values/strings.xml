@@ -130,11 +130,10 @@
     <!-- Profile -->
     <string name="profile_titulo">Perfil</string>
     <string name="profile_editar_titulo">Editar perfil</string>
-    <string name="profile_nombre">Nombre</string>
-    <string name="profile_apellido">Apellido</string>
+    <string name="profile_nombre">Nombre y Apellido</string>
     <string name="profile_correo">Correo</string>
-    <string name="profile_telefono">Teléfono</string>
-    <string name="profile_bio">Bio</string>
+    <string name="profile_cedula">Cédula</string>
+    <string name="profile_bio">Biografía (Opcional)</string>
     <string name="profile_guardar">GUARDAR</string>
     <string name="profile_datos_personales">Datos personales</string>
     <string name="profile_tus_eventos">Tus eventos</string>

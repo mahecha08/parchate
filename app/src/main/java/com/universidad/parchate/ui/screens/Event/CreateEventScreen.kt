@@ -60,6 +60,7 @@ import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.viewmodel.CreateEventViewModel
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Schedule
 
 private val categorias = listOf("Concierto", "Festival", "Teatro", "Feria", "Cultural", "Deportes", "Tecnología")
 private val modalidades = listOf("Presencial", "Online")
@@ -134,10 +135,12 @@ fun CreateEventScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TimePickerCaja(
+        cajasTexto(
             value = uiState.hora,
             onValueChange = { viewModel.onFieldChange { current -> current.copy(hora = it) } },
-            label = stringResource(R.string.create_hora_evento)
+            label = stringResource(R.string.create_hora_evento),
+            leadingIcon = Icons.Default.Schedule,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         Spacer(modifier = Modifier.height(16.dp))

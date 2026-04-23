@@ -34,8 +34,19 @@ import com.universidad.parchate.ui.theme.IconColor
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.viewmodel.UpdateEventViewModel
 
-private val categorias = listOf("Concierto", "Festival", "Teatro", "Feria", "Cultural", "Deportes", "Tecnología")
-private val modalidades = listOf("Presencial", "Online")
+private val categorias = listOf(
+    R.string.categoria_concierto,
+    R.string.categoria_festival,
+    R.string.categoria_teatro,
+    R.string.categoria_feria,
+    R.string.categoria_cultural,
+    R.string.categoria_deportes,
+    R.string.categoria_tecnologia
+)
+private val modalidades = listOf(
+    R.string.modalidad_presencial,
+    R.string.modalidad_online
+)
 
 @Composable
 fun UpdateEventScreen(
@@ -68,7 +79,7 @@ fun UpdateEventScreen(
         }
 
         Text(
-            text = "Actualizar Evento",
+            text = stringResource(R.string.update_titulo),
             color = RosadoNeon,
             fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
@@ -101,7 +112,7 @@ fun UpdateEventScreen(
 
             SimpleSelector(
                 title = stringResource(R.string.create_categoria),
-                options = categorias,
+                options = categorias.map { stringResource(it) },
                 selected = uiState.categoria,
                 onSelected = { value -> viewModel.onFieldChange { it.copy(categoria = value) } }
             )
@@ -157,7 +168,7 @@ fun UpdateEventScreen(
 
             SimpleSelector(
                 title = stringResource(R.string.create_modalidad),
-                options = modalidades,
+                options = modalidades.map { stringResource(it) },
                 selected = uiState.modalidad,
                 onSelected = { value -> viewModel.onFieldChange { it.copy(modalidad = value) } }
             )
@@ -260,7 +271,7 @@ fun UpdateEventScreen(
                 }
             } else {
                 glowButton(
-                    text = "Guardar Cambios",
+                    text = stringResource(R.string.update_guardar_cambios),
                     onClick = {
                         viewModel.updateEvent(eventId, onSuccess = onNavigateBack)
                     }
@@ -297,7 +308,7 @@ private fun UpdateImageSelector(
         } else {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, tint = RosadoNeon, modifier = Modifier.size(40.dp))
-                Text("Cambiar imagen", color = RosadoNeon, fontSize = 14.sp)
+                Text(stringResource(R.string.update_cambiar_imagen), color = RosadoNeon, fontSize = 14.sp)
             }
         }
     }

@@ -62,8 +62,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Schedule
 
-private val categorias = listOf("Concierto", "Festival", "Teatro", "Feria", "Cultural", "Deportes", "Tecnología")
-private val modalidades = listOf("Presencial", "Online")
+private val categorias = listOf(
+    R.string.categoria_concierto,
+    R.string.categoria_festival,
+    R.string.categoria_teatro,
+    R.string.categoria_feria,
+    R.string.categoria_cultural,
+    R.string.categoria_deportes,
+    R.string.categoria_tecnologia
+)
+private val modalidades = listOf(
+    R.string.modalidad_presencial,
+    R.string.modalidad_online
+)
 
 @Composable
 fun CreateEventScreen(
@@ -118,7 +129,7 @@ fun CreateEventScreen(
 
         SimpleSelector(
             title = stringResource(R.string.create_categoria),
-            options = categorias,
+            options = categorias.map { stringResource(it) },
             selected = uiState.categoria,
             onSelected = { value -> viewModel.onFieldChange { it.copy(categoria = value) } }
         )
@@ -174,7 +185,7 @@ fun CreateEventScreen(
 
         SimpleSelector(
             title = stringResource(R.string.create_modalidad),
-            options = modalidades,
+            options = modalidades.map { stringResource(it) },
             selected = uiState.modalidad,
             onSelected = { value -> viewModel.onFieldChange { it.copy(modalidad = value) } }
         )

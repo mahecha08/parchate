@@ -53,8 +53,21 @@ import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.viewmodel.HomeViewModel
 
-private val categorias = listOf("Todos", "Concierto", "Festival", "Teatro", "Feria", "Cultural", "Deportes", "Tecnología")
-private val modalidades = listOf("Todas", "presencial", "online")
+private val categorias = listOf(
+    R.string.categoria_todos,
+    R.string.categoria_concierto,
+    R.string.categoria_festival,
+    R.string.categoria_teatro,
+    R.string.categoria_feria,
+    R.string.categoria_cultural,
+    R.string.categoria_deportes,
+    R.string.categoria_tecnologia
+)
+private val modalidades = listOf(
+    R.string.modalidad_todas,
+    R.string.modalidad_presencial,
+    R.string.modalidad_online
+)
 
 @Composable
 fun HomeScreen(
@@ -65,6 +78,10 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showFilters by rememberSaveable { mutableStateOf(false) }
+
+    // Resolve string resource IDs outside LazyColumn
+    val categoriasResueltas = categorias.map { stringResource(it) }
+    val modalidadesResueltas = modalidades.map { stringResource(it) }
 
     Scaffold(
         bottomBar = {
@@ -119,7 +136,7 @@ fun HomeScreen(
                 ) {
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            categorias.take(4).forEach { categoria ->
+                            categoriasResueltas.take(4).forEach { categoria ->
                                 FilterChip(
                                     selected = uiState.filters.categoria == categoria,
                                     onClick = {
@@ -133,7 +150,7 @@ fun HomeScreen(
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            categorias.drop(4).forEach { categoria ->
+                            categoriasResueltas.drop(4).forEach { categoria ->
                                 FilterChip(
                                     selected = uiState.filters.categoria == categoria,
                                     onClick = {
@@ -157,12 +174,12 @@ fun HomeScreen(
                     item {
                         Spacer(modifier = Modifier.height(10.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            modalidades.forEach { modalidad ->
+                            modalidadesResueltas.forEach { modalidad ->
                                 AssistChip(
                                     onClick = {
                                         viewModel.updateFilters { it.copy(modalidad = modalidad) }
                                     },
-                                    label = { Text(modalidad.replaceFirstChar { it.uppercase() }) }
+                                    label = { Text(modalidad) }
                                 )
                             }
                             FilterChip(

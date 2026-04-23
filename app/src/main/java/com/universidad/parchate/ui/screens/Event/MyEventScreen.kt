@@ -37,19 +37,19 @@ fun MyEventsScreen(
         AlertDialog(
             onDismissRequest = { eventIdToDelete = null },
             containerColor = Color(0xFF1E1E2F),
-            title = { Text("¿Eliminar evento?", color = Color.White) },
-            text = { Text("Esta acción borrará el evento permanentemente de Parchate.", color = Color.LightGray) },
+            title = { Text(stringResource(R.string.my_events_eliminar_titulo), color = Color.White) },
+            text = { Text(stringResource(R.string.my_events_eliminar_mensaje), color = Color.LightGray) },
             confirmButton = {
                 TextButton(onClick = {
                     eventIdToDelete?.let { viewModel.deleteEvent(it) }
                     eventIdToDelete = null
                 }) {
-                    Text("Eliminar", color = RosadoNeon, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.my_events_eliminar), color = RosadoNeon, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { eventIdToDelete = null }) {
-                    Text("Cancelar", color = Color.White)
+                    Text(stringResource(R.string.my_events_cancelar), color = Color.White)
                 }
             }
         )
@@ -81,7 +81,7 @@ fun MyEventsScreen(
 
 
         Text(
-            text = "Tus eventos",
+            text = stringResource(R.string.my_events_titulo),
             color = RosadoNeon,
             fontSize = 46.sp,
             fontWeight = FontWeight.Bold,
@@ -98,7 +98,7 @@ fun MyEventsScreen(
             }
         } else if (uiState.events.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "No has creado eventos aún", color = Color.Gray)
+                Text(text = stringResource(R.string.my_events_no_eventos), color = Color.Gray)
             }
         } else {
             LazyColumn(

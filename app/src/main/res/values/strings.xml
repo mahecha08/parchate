@@ -139,4 +139,23 @@
     <string name="profile_tus_eventos">Tus eventos</string>
     <string name="profile_cambiar_contrasena">Cambia tu contraseña</string>
     <string name="profile_cerrar_sesion">Cerrar sesión</string>
+
+    <!-- MyEventsScreen -->
+    <string name="my_events_titulo">Tus eventos</string>
+    <string name="my_events_no_eventos">No has creado eventos aún</string>
+    <string name="my_events_eliminar_titulo">¿Eliminar evento?</string>
+    <string name="my_events_eliminar_mensaje">Esta acción borrará el evento permanentemente de Parchate.</string>
+    <string name="my_events_eliminar">Eliminar</string>
+    <string name="my_events_cancelar">Cancelar</string>
+
+    <!-- UpdateEventScreen -->
+    <string name="update_titulo">Actualizar Evento</string>
+    <string name="update_cambiar_imagen">Cambiar imagen</string>
+    <string name="update_guardar_cambios">Guardar Cambios</string>
+
+    <!-- EditProfileScreen -->
+    <string name="edit_profile_usuario">Usuario</string>
+
+
+    <string name="modalidad_todas_minus">Todas</string>
 </resources>

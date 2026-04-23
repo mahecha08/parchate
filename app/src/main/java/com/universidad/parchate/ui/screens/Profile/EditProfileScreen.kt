@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.universidad.parchate.R
 import com.universidad.parchate.ui.components.cajasTexto
 import com.universidad.parchate.ui.components.glowButton
+import com.universidad.parchate.ui.theme.AmarilloAdvertencia
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.theme.TextoSecundario
@@ -81,7 +82,7 @@ fun EditProfileScreen(
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = uiState.nombres.ifBlank { "Usuario" },
+                text = uiState.nombres.ifBlank { stringResource(R.string.edit_profile_usuario) },
                 color = TextoSecundario,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Medium
@@ -147,7 +148,7 @@ fun EditProfileScreen(
                 Text(
                     text = uiState.errorMessage!!,
                     textAlign = TextAlign.Center,
-                    color = Color(0xFFDFCB7A),
+                    color = AmarilloAdvertencia,
                     fontSize = 14.sp,
                     modifier = Modifier
                         .fillMaxWidth()

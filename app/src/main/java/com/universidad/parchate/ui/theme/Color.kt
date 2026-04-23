@@ -17,3 +17,5 @@ val TextoSecundario = Color(0xFF8E8EA8)
 
 // Color de los iconos dentro de los campos de texto
 val IconColor = Color(0xFFFF5277)
+
+val AmarilloAdvertencia = Color(0xFFDFCB7A)

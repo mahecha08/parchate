@@ -21,6 +21,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.universidad.parchate.R
@@ -36,6 +40,8 @@ import com.universidad.parchate.ui.components.CajaBoton
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.theme.TextoSecundario
+import com.universidad.parchate.ui.viewmodel.ProfileViewModel
+
 
 @Composable
 fun ProfileScreen(
@@ -43,8 +49,10 @@ fun ProfileScreen(
     onNavitageToEdit: () -> Unit,
     onNavigateToEvents: () -> Unit,
     onNavigateToChangePassword: () -> Unit,
-    onNavigateToStart: () -> Unit
+    onNavigateToStart: () -> Unit,
+    viewModel: ProfileViewModel = viewModel()
 ){
+    val uiState by viewModel.uiState.collectAsState()
     Scaffold(
         containerColor = BackgroundPrincipal
     ) { paddingValues ->
@@ -88,7 +96,12 @@ fun ProfileScreen(
                         modifier = Modifier.size(80.dp)
                     )
                 }
-                Text(text = stringResource(R.string.profile_nombre), color = TextoSecundario, fontSize = 25.sp)
+                Text(
+                    text = uiState.nombres.ifBlank { stringResource(R.string.edit_profile_usuario) },
+                    color = TextoSecundario,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
 
 

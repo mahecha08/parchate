@@ -51,6 +51,7 @@ fun EditProfileScreen(
             .background(BackgroundPrincipal)
             .verticalScroll(scrollState)
             .padding(bottom = 30.dp)
+            .padding(vertical = 20.dp)
     ) {
 
         Row(

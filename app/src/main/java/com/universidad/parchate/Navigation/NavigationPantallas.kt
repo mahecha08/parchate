@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.universidad.parchate.ui.screens.Event.MyEventsScreen
 import com.universidad.parchate.ui.screens.Event.UpdateEventScreen
+import com.universidad.parchate.ui.screens.Favorites.FavoritesScreen
 import com.universidad.parchate.ui.screens.Home.HomeScreen
 import com.universidad.parchate.ui.screens.Login.ForgotPasswordScreen
 import com.universidad.parchate.ui.screens.Login.LoginScreen
@@ -54,6 +55,9 @@ fun NavigationPantallas() {
                 },
                 onNavigateToProfile = {
                     navController.navigate(Profile)
+                },
+                onNavigateToFavorites = {
+                    navController.navigate(Favorites)
                 }
             )
         }
@@ -140,6 +144,13 @@ fun NavigationPantallas() {
                 onNavigateToEdit = { eventId ->
                     navController.navigate(UpdateEvent(eventId = eventId))
                 }
+            )
+        }
+
+        composable<Favorites> {
+            FavoritesScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDetail = { }
             )
         }
 

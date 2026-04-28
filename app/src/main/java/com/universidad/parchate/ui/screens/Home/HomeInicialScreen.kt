@@ -74,6 +74,7 @@ fun HomeScreen(
     onNavigateToCreate: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {},
     viewModel: HomeViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -88,7 +89,8 @@ fun HomeScreen(
             BottomNavParchate(
                 onAddClick = onNavigateToCreate,
                 onMapClick = onNavigateToMap,
-                onProfileClick = onNavigateToProfile
+                onProfileClick = onNavigateToProfile,
+                onFavoritesClick = onNavigateToFavorites
             )
         },
         containerColor = BackgroundPrincipal
@@ -221,7 +223,12 @@ fun HomeScreen(
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
                         items(uiState.filteredEvents, key = { it.id }) { evento ->
-                            EventCard(evento = evento, onDetailClick = { })
+                            EventCard(
+                                evento = evento,
+                                onDetailClick = { },
+                                isFavorite = evento.id in uiState.favoriteEventIds,
+                                onFavoriteClick = { viewModel.toggleFavorite(evento.id) }
+                            )
                         }
                     }
                 }
@@ -235,7 +242,8 @@ fun BottomNavParchate(
     onAddClick: () -> Unit,
     onMapClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {}
+    onProfileClick: () -> Unit = {},
+    onFavoritesClick: () -> Unit = {}
 ) {
     NavigationBar(
         containerColor = Color(0xFF1B172E),
@@ -267,7 +275,7 @@ fun BottomNavParchate(
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onFavoritesClick,
             icon = { Icon(Icons.Default.Favorite, contentDescription = null, tint = Color.White) },
             colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent)
         )

@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
@@ -20,6 +23,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,7 +42,9 @@ import com.universidad.parchate.ui.theme.TextoSecundario
 @Composable
 fun EventCard(
     evento: Evento,
-    onDetailClick: () -> Unit
+    onDetailClick: () -> Unit,
+    isFavorite: Boolean = false,
+    onFavoriteClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -118,16 +124,30 @@ fun EventCard(
                         fontWeight = FontWeight.Medium
                     )
                 }
+                Row() {
+                    IconButton(onClick = onFavoriteClick) {
+                        Icon(
+                            if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = null,
+                            tint = RosadoNeon
+                        )
+                    }
+                    Button(
+                        onClick = onDetailClick,
+                        modifier = Modifier
+                            .height(40.dp)
+                            .width(110.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = RosadoNeon),
+                        shape = RoundedCornerShape(15.dp)
+                    ) {
+                        Text(
+                            "Ver Detalles",
+                            fontSize = 10.sp,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-                Button(
-                    onClick = onDetailClick,
-                    modifier = Modifier
-                        .height(40.dp)
-                        .width(110.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = RosadoNeon),
-                    shape = RoundedCornerShape(15.dp)
-                ) {
-                    Text("Ver Detalles", fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }

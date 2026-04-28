@@ -36,6 +36,8 @@ object EditProfile
 @Serializable
 object ViewMyEvents
 
+@Serializable
+object Favorites
 
 @Serializable
 data class UpdateEvent(val eventId: String)

@@ -4,6 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.universidad.parchate.data.model.Evento
 import com.universidad.parchate.data.repository.EventRepository
+import com.universidad.parchate.data.repository.UserRepository
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,11 +27,13 @@ data class HomeUiState(
     val events: List<Evento> = emptyList(),
     val filteredEvents: List<Evento> = emptyList(),
     val errorMessage: String? = null,
-    val filters: HomeFilterState = HomeFilterState()
+    val filters: HomeFilterState = HomeFilterState(),
+    val favoriteEventIds: Set<String> = emptySet()
 )
 
 class HomeViewModel(
-    private val repository: EventRepository = EventRepository()
+    private val eventRepository: EventRepository = EventRepository(),
+    private val userRepository: UserRepository = UserRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -35,11 +41,46 @@ class HomeViewModel(
 
     init {
         observeEvents()
+        observeFavorites()
+    }
+
+    private fun observeFavorites() {
+        val userId = Firebase.auth.currentUser?.uid ?: return
+        val firestore = FirebaseFirestore.getInstance()
+        firestore.collection("users").document(userId)
+            .addSnapshotListener { snapshot, _ ->
+                snapshot?.data?.get("favoriteEventIds")
+                    ?.let { it as? List<*> }
+                    ?.filterIsInstance<String>()
+                    ?.let { favoriteIds ->
+                        _uiState.update { state ->
+                            state.copy(favoriteEventIds = favoriteIds.toSet())
+                        }
+                    }
+            }
+    }
+
+    fun toggleFavorite(eventId: String) {
+        val userId = Firebase.auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            val isFavorite = eventId in _uiState.value.favoriteEventIds
+            if (isFavorite) {
+                userRepository.removeFavorite(eventId)
+                _uiState.update { state ->
+                    state.copy(favoriteEventIds = state.favoriteEventIds - eventId)
+                }
+            } else {
+                userRepository.addFavorite(eventId)
+                _uiState.update { state ->
+                    state.copy(favoriteEventIds = state.favoriteEventIds + eventId)
+                }
+            }
+        }
     }
 
     private fun observeEvents() {
         viewModelScope.launch {
-            repository.observeActiveEvents().collect { result ->
+            eventRepository.observeActiveEvents().collect { result ->
                 result
                     .onSuccess { events ->
                         _uiState.update { current ->

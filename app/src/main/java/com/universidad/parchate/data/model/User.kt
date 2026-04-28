@@ -5,5 +5,6 @@ data class User(
     val nombres: String = "",
     val cedula: String = "",
     val fechaNacimiento: String = "",
-    val correo: String = ""
+    val correo: String = "",
+    val favoriteEventIds: List<String> = emptyList()
 )

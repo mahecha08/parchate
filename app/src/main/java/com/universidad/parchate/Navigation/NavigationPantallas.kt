@@ -1,10 +1,10 @@
 package com.universidad.parchate.Navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.toRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.universidad.parchate.ui.screens.Event.MyEventsScreen
 import com.universidad.parchate.ui.screens.Event.UpdateEventScreen
 import com.universidad.parchate.ui.screens.Favorites.FavoritesScreen
@@ -13,45 +13,109 @@ import com.universidad.parchate.ui.screens.Login.ForgotPasswordScreen
 import com.universidad.parchate.ui.screens.Login.LoginScreen
 import com.universidad.parchate.ui.screens.Login.RegisterScreen
 import com.universidad.parchate.ui.screens.Login.VerificationCodeScreen
-import com.universidad.parchate.ui.screens.Profile.ProfileScreen
 import com.universidad.parchate.ui.screens.Profile.EditProfileScreen
+import com.universidad.parchate.ui.screens.Profile.ProfileScreen
 import com.universidad.parchate.ui.screens.create.CreateEventScreen
+import com.universidad.parchate.ui.screens.map.EventsMapScreen
+import com.universidad.parchate.ui.screens.map.MapPickerScreen
 import com.universidad.parchate.ui.screens.start.StartScreen
+
+object Routes {
+    const val START = "start"
+    const val LOGIN = "login"
+    const val REGISTER = "register"
+    const val FORGOT_PASSWORD = "forgot_password"
+    const val VERIFICATION_CODE = "verification_code/{method}/{contact}"
+    const val HOME = "home"
+    const val CREATE_EVENT = "create_event"
+    const val MAP_PICKER = "map_picker"
+    const val EVENTS_MAP = "events_map"
+}
 
 @Composable
 fun NavigationPantallas() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Inicio) {
-
-        composable<Inicio> {
+    NavHost(
+        navController = navController,
+        startDestination = Routes.START
+    ) {
+        composable(Routes.START) {
             StartScreen(
-                navigationToLogin = { navController.navigate(Login) }
+                navigationToLogin = {
+                    navController.navigate(Routes.LOGIN)
+                }
             )
         }
 
-        composable<Login> {
+        composable(Routes.LOGIN) {
             LoginScreen(
                 navigationToHome = {
-                    navController.navigate(Home) {
-                        popUpTo(Login) { inclusive = true }
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 },
-                navigationToRegister = { navController.navigate(Register) },
+                navigationToRegister = {
+                    navController.navigate(Routes.REGISTER)
+                },
                 onNavigateToback = {
-                    navController.navigate(Login) {
-                        popUpTo(Login) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 },
-                // Nuevo: navegar a olvidé contraseña
-                onNavigateToForgotPassword = { navController.navigate(ForgotPassword) }
+                onNavigateToForgotPassword = {
+                    navController.navigate(Routes.FORGOT_PASSWORD)
+                }
             )
         }
 
-        composable<Home> {
+        composable(Routes.REGISTER) {
+            RegisterScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.FORGOT_PASSWORD) {
+            ForgotPasswordScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToVerification = { method, contact ->
+                    navController.navigate("verification_code/$method/$contact")
+                }
+            )
+        }
+
+        composable(Routes.VERIFICATION_CODE) { backStackEntry ->
+            val method = backStackEntry.arguments?.getString("method").orEmpty()
+            val contact = backStackEntry.arguments?.getString("contact").orEmpty()
+
+            VerificationCodeScreen(
+                method = method,
+                contact = contact,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onVerified = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.START) { inclusive = false }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.HOME) {
             HomeScreen(
                 onNavigateToCreate = {
-                    navController.navigate(CreateEvent)
+                    navController.navigate(Routes.CREATE_EVENT)
+                },
+                onNavigateToMap = {
+                    navController.navigate(Routes.EVENTS_MAP)
                 },
                 onNavigateToProfile = {
                     navController.navigate(Profile)
@@ -62,46 +126,76 @@ fun NavigationPantallas() {
             )
         }
 
-        composable<Register> {
-            RegisterScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToLogin = {
-                    navController.navigate(Login) {
-                        popUpTo(Login) { inclusive = true }
-                    }
-                }
-            )
-        }
+        composable(Routes.CREATE_EVENT) { backStackEntry ->
+            val savedStateHandle = backStackEntry.savedStateHandle
 
-        composable<ForgotPassword> {
-            ForgotPasswordScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToVerification = { method, contact ->
-                    navController.navigate(VerificationCode(method = method, contact = contact))
-                }
-            )
-        }
+            val selectedLatitud = savedStateHandle.get<Double>("selected_latitud")
+            val selectedLongitud = savedStateHandle.get<Double>("selected_longitud")
+            val selectedPais = savedStateHandle.get<String>("selected_pais")
+            val selectedCiudad = savedStateHandle.get<String>("selected_ciudad")
+            val selectedDireccion = savedStateHandle.get<String>("selected_direccion")
+            val selectedUbicacion = savedStateHandle.get<String>("selected_ubicacion")
 
-        composable<VerificationCode> { backStackEntry ->
-            val args = backStackEntry.toRoute<VerificationCode>()
-            VerificationCodeScreen(
-                method = args.method,
-                contact = args.contact,
-                onNavigateBack = { navController.popBackStack() },
-                onVerified = {
-                    navController.navigate(Login) {
-                        popUpTo(Inicio) { inclusive = false }
-                    }
-                }
-            )
-        }
-        composable<CreateEvent> {
             CreateEventScreen(
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
                 onNavigateToHome = {
-                    navController.navigate(Home) {
-                        popUpTo(Home) { inclusive = true }
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) { inclusive = true }
                     }
+                },
+                onNavigateToMapPicker = {
+                    navController.navigate(Routes.MAP_PICKER)
+                },
+                selectedLatitud = selectedLatitud,
+                selectedLongitud = selectedLongitud,
+                selectedPais = selectedPais,
+                selectedCiudad = selectedCiudad,
+                selectedDireccion = selectedDireccion,
+                selectedUbicacion = selectedUbicacion
+            )
+        }
+
+        composable(Routes.MAP_PICKER) {
+            MapPickerScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onLocationSelected = { latitud, longitud, pais, ciudad, direccion, ubicacion ->
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("selected_latitud", latitud)
+
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("selected_longitud", longitud)
+
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("selected_pais", pais)
+
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("selected_ciudad", ciudad)
+
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("selected_direccion", direccion)
+
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("selected_ubicacion", ubicacion)
+
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Routes.EVENTS_MAP) {
+            EventsMapScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -109,16 +203,19 @@ fun NavigationPantallas() {
         composable<Profile> {
             ProfileScreen(
                 onNavigateToHome = {
-                    navController.navigate(Home) {
-                        popUpTo(Home) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 },
-                onNavitageToEdit = { navController.navigate(EditProfile) },
-                onNavigateToEvents = { navController.navigate(ViewMyEvents) },
+                onNavitageToEdit = {
+                    navController.navigate(EditProfile)
+                },
+                onNavigateToEvents = {
+                    navController.navigate(ViewMyEvents)
+                },
                 onNavigateToChangePassword = { },
                 onNavigateToStart = {
-                    navController.navigate(Inicio) {
-                        popUpTo(Inicio) { inclusive = true }
+                    val startDestinationId = navController.graph.startDestinationId
+                    navController.navigate(Routes.START) {
+                        popUpTo(startDestinationId) { inclusive = true }
                     }
                 }
             )
@@ -126,7 +223,9 @@ fun NavigationPantallas() {
 
         composable<EditProfile> {
             EditProfileScreen(
-                OnNavigateToProfile = {navController.navigate(Profile)}
+                OnNavigateToProfile = {
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -153,7 +252,5 @@ fun NavigationPantallas() {
                 onNavigateToDetail = { }
             )
         }
-
-
     }
 }

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
@@ -32,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -57,11 +57,16 @@ fun EventCard(
             if (evento.imagenUrl.isNotBlank()) {
                 AsyncImage(
                     model = evento.imagenUrl,
-                    contentDescription = evento.titulo,
+                    contentDescription = evento.nombreVisible,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)),
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 30.dp,
+                                topEnd = 30.dp
+                            )
+                        ),
                     contentScale = ContentScale.Crop
                 )
             } else {
@@ -69,11 +74,20 @@ fun EventCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 30.dp,
+                                topEnd = 30.dp
+                            )
+                        )
                         .background(Color(0xFF35325E)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Sin imagen", color = TextoSecundario, fontSize = 14.sp)
+                    Text(
+                        text = "Sin imagen",
+                        color = TextoSecundario,
+                        fontSize = 14.sp
+                    )
                 }
             }
 
@@ -84,35 +98,65 @@ fun EventCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
-                        text = evento.titulo,
+                        text = evento.nombreVisible,
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
 
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Text(
-                        text = evento.categoria.replaceFirstChar { it.uppercase() },
-                        color = RosadoNeon,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Schedule, contentDescription = null, tint = RosadoNeon, modifier = Modifier.size(16.dp))
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = RosadoNeon,
+                            modifier = Modifier.size(16.dp)
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "${evento.fecha} · ${evento.hora}", color = TextoSecundario, fontSize = 12.sp)
+                        Text(
+                            text = buildString {
+                                append(evento.fecha)
+                                if (evento.hora.isNotBlank()) {
+                                    append(" · ")
+                                    append(evento.hora)
+                                }
+                            },
+                            color = TextoSecundario,
+                            fontSize = 12.sp
+                        )
                     }
 
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.LocationOn, contentDescription = null, tint = RosadoNeon, modifier = Modifier.size(16.dp))
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = RosadoNeon,
+                            modifier = Modifier.size(16.dp)
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "${evento.ubicacion}, ${evento.ciudad}", color = TextoSecundario, fontSize = 12.sp)
+                        Text(
+                            text = evento.ubicacion.ifBlank { "Ubicación por definir" },
+                            color = TextoSecundario,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    if (evento.descripcion.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = evento.descripcion,
+                            color = TextoSecundario,
+                            fontSize = 12.sp,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -124,7 +168,8 @@ fun EventCard(
                         fontWeight = FontWeight.Medium
                     )
                 }
-                Row() {
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onFavoriteClick) {
                         Icon(
                             if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -132,6 +177,7 @@ fun EventCard(
                             tint = RosadoNeon
                         )
                     }
+
                     Button(
                         onClick = onDetailClick,
                         modifier = Modifier
@@ -141,13 +187,12 @@ fun EventCard(
                         shape = RoundedCornerShape(15.dp)
                     ) {
                         Text(
-                            "Ver Detalles",
+                            text = "Ver detalles",
                             fontSize = 10.sp,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
                     }
-
                 }
             }
         }

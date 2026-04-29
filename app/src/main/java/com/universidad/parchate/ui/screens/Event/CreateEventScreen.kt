@@ -18,10 +18,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddPhotoAlternate
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Festival
@@ -29,6 +30,8 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,12 +41,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -55,12 +60,10 @@ import com.universidad.parchate.R
 import com.universidad.parchate.ui.components.TimePickerCaja
 import com.universidad.parchate.ui.components.cajasTexto
 import com.universidad.parchate.ui.components.glowButton
+import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.IconColor
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.viewmodel.CreateEventViewModel
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.filled.Schedule
 
 private val categorias = listOf(
     R.string.categoria_concierto,
@@ -71,6 +74,7 @@ private val categorias = listOf(
     R.string.categoria_deportes,
     R.string.categoria_tecnologia
 )
+
 private val modalidades = listOf(
     R.string.modalidad_presencial,
     R.string.modalidad_online
@@ -80,25 +84,63 @@ private val modalidades = listOf(
 fun CreateEventScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHome: () -> Unit,
-    viewModel: CreateEventViewModel = viewModel()
+    onNavigateToMapPicker: () -> Unit,
+    selectedLatitud: Double? = null,
+    selectedLongitud: Double? = null,
+    selectedPais: String? = null,
+    selectedCiudad: String? = null,
+    selectedDireccion: String? = null,
+    selectedUbicacion: String? = null,
+    createEventViewModel: CreateEventViewModel = viewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by createEventViewModel.uiState.collectAsState()
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        viewModel.onImageSelected(uri)
+        createEventViewModel.onImageSelected(uri)
+    }
+
+    LaunchedEffect(
+        selectedLatitud,
+        selectedLongitud,
+        selectedPais,
+        selectedCiudad,
+        selectedDireccion,
+        selectedUbicacion
+    ) {
+        createEventViewModel.applySelectedLocation(
+            latitud = selectedLatitud,
+            longitud = selectedLongitud,
+            pais = selectedPais,
+            ciudad = selectedCiudad,
+            direccion = selectedDireccion,
+            ubicacion = selectedUbicacion
+        )
+    }
+
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            createEventViewModel.consumeSuccess()
+            onNavigateToHome()
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF1B172E))
+            .background(BackgroundPrincipal)
             .padding(vertical = 10.dp)
             .verticalScroll(rememberScrollState())
     ) {
         IconButton(
             onClick = onNavigateBack,
-            modifier = Modifier.padding(top = 40.dp, start = 8.dp).padding(vertical = 20.dp)
+            modifier = Modifier
+                .padding(top = 40.dp, start = 8.dp)
+                .padding(vertical = 20.dp)
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = RosadoNeon)
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.atras),
+                tint = RosadoNeon
+            )
         }
 
         Text(
@@ -109,11 +151,13 @@ fun CreateEventScreen(
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         cajasTexto(
             value = uiState.titulo,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(titulo = it) } },
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(titulo = it) }
+            },
             label = stringResource(R.string.create_titulo_evento),
             leadingIcon = Icons.Default.Festival
         )
@@ -131,14 +175,20 @@ fun CreateEventScreen(
             title = stringResource(R.string.create_categoria),
             options = categorias.map { stringResource(it) },
             selected = uiState.categoria,
-            onSelected = { value -> viewModel.onFieldChange { it.copy(categoria = value) } }
+            onSelected = { value ->
+                createEventViewModel.onFieldChange { current -> current.copy(categoria = value) }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         cajasTexto(
             value = uiState.fecha,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(fecha = it) } },
+            onValueChange = { input ->
+                if (input.all { char -> char.isDigit() || char == '-' }) {
+                    createEventViewModel.onFieldChange { current -> current.copy(fecha = input) }
+                }
+            },
             label = stringResource(R.string.create_fecha_evento),
             leadingIcon = Icons.Default.DateRange,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -146,39 +196,12 @@ fun CreateEventScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        cajasTexto(
+        TimePickerCaja(
             value = uiState.hora,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(hora = it) } },
-            label = stringResource(R.string.create_hora_evento),
-            leadingIcon = Icons.Default.Schedule,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        cajasTexto(
-            value = uiState.ubicacion,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(ubicacion = it) } },
-            label = stringResource(R.string.create_lugar_evento),
-            leadingIcon = Icons.Default.LocationOn,
-            trailingIcon = { Icon(Icons.Default.Map, contentDescription = null, tint = IconColor) }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        cajasTexto(
-            value = uiState.direccion,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(direccion = it) } },
-            label = stringResource(R.string.create_direccion),
-            leadingIcon = Icons.Default.Map
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        cajasTexto(
-            value = uiState.ciudad,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(ciudad = it) } },
-            label = stringResource(R.string.create_ciudad)
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(hora = it) }
+            },
+            label = stringResource(R.string.create_hora_evento)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -187,42 +210,126 @@ fun CreateEventScreen(
             title = stringResource(R.string.create_modalidad),
             options = modalidades.map { stringResource(it) },
             selected = uiState.modalidad,
-            onSelected = { value -> viewModel.onFieldChange { it.copy(modalidad = value) } }
+            onSelected = { value ->
+                createEventViewModel.onFieldChange { current -> current.copy(modalidad = value) }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        glowButton(
+            text = "SELECCIONAR UBICACION EN EL MAPA",
+            onClick = onNavigateToMapPicker
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         cajasTexto(
+            value = uiState.pais,
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(pais = it) }
+            },
+            label = "Pais",
+            leadingIcon = Icons.Default.Public,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        cajasTexto(
+            value = uiState.ciudad,
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(ciudad = it) }
+            },
+            label = stringResource(R.string.create_ciudad),
+            leadingIcon = Icons.Default.LocationOn,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        cajasTexto(
+            value = uiState.direccion,
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(direccion = it) }
+            },
+            label = "Direccion detectada",
+            leadingIcon = Icons.Default.Map,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        cajasTexto(
+            value = uiState.ubicacion,
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(ubicacion = it) }
+            },
+            label = stringResource(R.string.create_lugar_evento),
+            leadingIcon = Icons.Default.Place,
+            trailingIcon = { Icon(Icons.Default.Map, contentDescription = null, tint = IconColor) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (uiState.modalidad.equals("online", ignoreCase = true)) {
+            Text(
+                text = "Para eventos online, el mapa es opcional. Puedes usar la ubicacion para poner el enlace o la plataforma.",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                color = Color.White.copy(alpha = 0.75f),
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        cajasTexto(
             value = uiState.descripcion,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(descripcion = it) } },
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(descripcion = it) }
+            },
             label = stringResource(R.string.create_descripcion),
             leadingIcon = Icons.Default.Description,
-            modifier = Modifier.height(120.dp)
+            modifier = Modifier.height(120.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         cajasTexto(
             value = uiState.organizadorNombre,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(organizadorNombre = it) } },
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(organizadorNombre = it) }
+            },
             label = stringResource(R.string.create_nombre_organizador),
-            leadingIcon = Icons.Default.Person
+            leadingIcon = Icons.Default.Person,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         cajasTexto(
             value = uiState.contactoOrganizador,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(contactoOrganizador = it) } },
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(contactoOrganizador = it) }
+            },
             label = stringResource(R.string.create_contacto_organizador),
-            leadingIcon = Icons.Default.Phone
+            leadingIcon = Icons.Default.Phone,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         cajasTexto(
             value = uiState.capacidad,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(capacidad = it.filter(Char::isDigit)) } },
+            onValueChange = {
+                createEventViewModel.onFieldChange { current ->
+                    current.copy(capacidad = it.filter(Char::isDigit))
+                }
+            },
             label = stringResource(R.string.create_capacidad_maxima),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -231,8 +338,11 @@ fun CreateEventScreen(
 
         cajasTexto(
             value = uiState.etiquetas,
-            onValueChange = { viewModel.onFieldChange { current -> current.copy(etiquetas = it) } },
-            label = stringResource(R.string.create_etiquetas)
+            onValueChange = {
+                createEventViewModel.onFieldChange { current -> current.copy(etiquetas = it) }
+            },
+            label = stringResource(R.string.create_etiquetas),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -248,8 +358,11 @@ fun CreateEventScreen(
                 Checkbox(
                     checked = uiState.gratis,
                     onCheckedChange = { checked ->
-                        viewModel.onFieldChange { current ->
-                            current.copy(gratis = checked, precio = if (checked) "" else current.precio)
+                        createEventViewModel.onFieldChange { current ->
+                            current.copy(
+                                gratis = checked,
+                                precio = if (checked) "" else current.precio
+                            )
                         }
                     }
                 )
@@ -260,10 +373,14 @@ fun CreateEventScreen(
                 Checkbox(
                     checked = uiState.destacado,
                     onCheckedChange = { checked ->
-                        viewModel.onFieldChange { current -> current.copy(destacado = checked) }
+                        createEventViewModel.onFieldChange { current -> current.copy(destacado = checked) }
                     }
                 )
-                Icon(Icons.Default.Star, contentDescription = null, tint = RosadoNeon)
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = RosadoNeon
+                )
                 Text(stringResource(R.string.create_destacado), color = Color.White)
             }
         }
@@ -272,15 +389,30 @@ fun CreateEventScreen(
             Spacer(modifier = Modifier.height(16.dp))
             cajasTexto(
                 value = uiState.precio,
-                onValueChange = { viewModel.onFieldChange { current -> current.copy(precio = it) } },
+                onValueChange = {
+                    createEventViewModel.onFieldChange { current -> current.copy(precio = it) }
+                },
                 label = stringResource(R.string.create_precio),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
 
-        uiState.errorMessage?.let {
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (uiState.latitud.isNotBlank() && uiState.longitud.isNotBlank()) {
             Text(
-                text = it,
+                text = "Coordenadas: ${uiState.latitud}, ${uiState.longitud}",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                color = Color.White.copy(alpha = 0.75f),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        uiState.errorMessage?.let { error ->
+            Text(
+                text = error,
                 color = Color.Red,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -289,30 +421,29 @@ fun CreateEventScreen(
             )
         }
 
-        uiState.successMessage?.let {
-            Text(
-                text = it,
-                color = Color.Green,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp, vertical = 8.dp),
-                textAlign = TextAlign.Center
-            )
-        }
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = RosadoNeon)
-            }
-        } else {
-            glowButton(
-                text = stringResource(R.string.create_registrar_evento),
-                onClick = {
-                    viewModel.saveEvent(onSuccess = onNavigateToHome)
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            if (uiState.isSaving) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CircularProgressIndicator(color = RosadoNeon)
+                    Text(
+                        text = "Guardando evento...",
+                        color = Color.White
+                    )
                 }
-            )
+            } else {
+                glowButton(
+                    text = stringResource(R.string.create_registrar_evento),
+                    onClick = createEventViewModel::saveEvent
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -343,9 +474,18 @@ private fun ImageSelector(
             )
         } else {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, tint = RosadoNeon, modifier = Modifier.size(40.dp))
+                Icon(
+                    imageVector = Icons.Default.AddPhotoAlternate,
+                    contentDescription = null,
+                    tint = RosadoNeon,
+                    modifier = Modifier.size(40.dp)
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.create_cargar_imagen), color = RosadoNeon, fontSize = 14.sp)
+                Text(
+                    text = stringResource(R.string.create_cargar_imagen),
+                    color = RosadoNeon,
+                    fontSize = 14.sp
+                )
             }
         }
     }
@@ -359,11 +499,23 @@ private fun SimpleSelector(
     onSelected: (String) -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(text = title, color = Color.White, style = MaterialTheme.typography.titleSmall)
+        Text(
+            text = title,
+            color = Color.White,
+            style = MaterialTheme.typography.titleSmall
+        )
         options.forEach { option ->
             Row(verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(selected = selected == option, onClick = { onSelected(option) })
-                Text(text = option, color = Color.White)
+                RadioButton(
+                    selected = selected == option,
+                    onClick = { onSelected(option) }
+                )
+                Text(
+                    text = option.replaceFirstChar { char ->
+                        if (char.isLowerCase()) char.titlecase() else char.toString()
+                    },
+                    color = Color.White
+                )
             }
         }
     }

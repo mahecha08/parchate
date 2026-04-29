@@ -1,6 +1,5 @@
 package com.universidad.parchate.data.repository
 
-
 import android.net.Uri
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
@@ -9,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.storage
 import com.universidad.parchate.data.model.Evento
+import com.universidad.parchate.data.model.toEventoOrNull
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -24,6 +24,7 @@ data class CreateEventRequest(
     val ubicacion: String,
     val direccion: String,
     val ciudad: String,
+    val pais: String = "",
     val precio: Double,
     val gratis: Boolean,
     val modalidad: String,
@@ -32,7 +33,9 @@ data class CreateEventRequest(
     val capacidad: Int,
     val etiquetas: List<String>,
     val destacado: Boolean,
-    val imageUri: Uri?
+    val latitud: Double? = null,
+    val longitud: Double? = null,
+    val imageUri: Uri? = null
 )
 
 class EventRepository(
@@ -44,7 +47,6 @@ class EventRepository(
 
     fun observeActiveEvents(): Flow<Result<List<Evento>>> = callbackFlow {
         val listener = eventsCollection
-            .whereEqualTo("estado", "activo")
             .orderBy("fecha", Query.Direction.ASCENDING)
             .orderBy("hora", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, error ->
@@ -54,7 +56,8 @@ class EventRepository(
                 }
 
                 val events = snapshot?.documents
-                    ?.mapNotNull { document -> document.toObject(Evento::class.java)?.copy(id = document.id) }
+                    ?.mapNotNull { document -> document.toEventoOrNull() }
+                    ?.filter { it.estado == "activo" || it.estado.isBlank() }
                     .orEmpty()
 
                 trySend(Result.success(events))
@@ -65,48 +68,56 @@ class EventRepository(
 
     suspend fun createEvent(request: CreateEventRequest): Result<String> {
         return try {
-            val userId = auth.currentUser?.uid.orEmpty()
+            val now = Timestamp.now()
             val docRef = eventsCollection.document()
+            val userId = auth.currentUser?.uid.orEmpty()
             val imageUrl = request.imageUri?.let { uri ->
                 uploadEventImage(eventId = docRef.id, imageUri = uri)
             }.orEmpty()
 
-            val event = Evento(
-                id = docRef.id,
-                titulo = request.titulo.trim(),
-                descripcion = request.descripcion.trim(),
-                categoria = request.categoria.trim(),
-                fecha = request.fecha.trim(),
-                hora = request.hora.trim(),
-                ubicacion = request.ubicacion.trim(),
-                direccion = request.direccion.trim(),
-                ciudad = request.ciudad.trim(),
-                precio = if (request.gratis) 0.0 else request.precio,
-                gratis = request.gratis,
-                modalidad = request.modalidad.trim(),
-                organizadorId = userId,
-                organizadorNombre = request.organizadorNombre.trim(),
-                contactoOrganizador = request.contactoOrganizador.trim(),
-                capacidad = request.capacidad,
-                etiquetas = request.etiquetas,
-                imagenUrl = imageUrl,
-                estado = "activo",
-                createdAt = Timestamp.now(),
-                updatedAt = Timestamp.now(),
-                destacado = request.destacado
+            val eventData = buildEventData(
+                Evento(
+                    id = docRef.id,
+                    nombre = request.titulo.trim(),
+                    titulo = request.titulo.trim(),
+                    fecha = request.fecha.trim(),
+                    hora = request.hora.trim(),
+                    ubicacion = request.ubicacion.trim(),
+                    descripcion = request.descripcion.trim(),
+                    imagenUrl = imageUrl,
+                    pais = request.pais.trim(),
+                    ciudad = request.ciudad.trim(),
+                    direccion = request.direccion.trim(),
+                    latitud = request.latitud,
+                    longitud = request.longitud,
+                    estado = "activo",
+                    categoria = request.categoria.trim(),
+                    contactoOrganizador = request.contactoOrganizador.trim(),
+                    precio = if (request.gratis) 0.0 else request.precio,
+                    etiquetas = request.etiquetas,
+                    modalidad = request.modalidad.trim().lowercase(),
+                    organizadorId = userId,
+                    organizadorNombre = request.organizadorNombre.trim(),
+                    destacado = request.destacado,
+                    capacidad = request.capacidad,
+                    gratis = request.gratis,
+                    createdAt = now,
+                    updatedAt = now
+                ),
+                now = now
             )
 
-            docRef.set(event).await()
+            docRef.set(eventData).await()
             Result.success(docRef.id)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
+
     suspend fun getEventById(eventId: String): Result<Evento?> {
         return try {
             val document = eventsCollection.document(eventId).get().await()
-            val event = document.toObject(Evento::class.java)?.copy(id = document.id)
-            Result.success(event)
+            Result.success(document.toEventoOrNull())
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -115,6 +126,7 @@ class EventRepository(
     suspend fun updateEvent(eventId: String, request: CreateEventRequest): Result<Boolean> {
         return try {
             val updates = mutableMapOf<String, Any>(
+                "nombre" to request.titulo.trim(),
                 "titulo" to request.titulo.trim(),
                 "descripcion" to request.descripcion.trim(),
                 "categoria" to request.categoria.trim(),
@@ -123,9 +135,10 @@ class EventRepository(
                 "ubicacion" to request.ubicacion.trim(),
                 "direccion" to request.direccion.trim(),
                 "ciudad" to request.ciudad.trim(),
+                "pais" to request.pais.trim(),
                 "precio" to if (request.gratis) 0.0 else request.precio,
                 "gratis" to request.gratis,
-                "modalidad" to request.modalidad.trim(),
+                "modalidad" to request.modalidad.trim().lowercase(),
                 "organizadorNombre" to request.organizadorNombre.trim(),
                 "contactoOrganizador" to request.contactoOrganizador.trim(),
                 "capacidad" to request.capacidad,
@@ -133,6 +146,9 @@ class EventRepository(
                 "destacado" to request.destacado,
                 "updatedAt" to Timestamp.now()
             )
+
+            request.latitud?.let { updates["latitud"] = it }
+            request.longitud?.let { updates["longitud"] = it }
             request.imageUri?.let { uri ->
                 val newImageUrl = uploadEventImage(eventId, uri)
                 updates["imagenUrl"] = newImageUrl
@@ -145,40 +161,109 @@ class EventRepository(
         }
     }
 
+    suspend fun saveEvent(evento: Evento): Result<Unit> {
+        return try {
+            val now = Timestamp.now()
+            val eventData = buildEventData(evento, now)
+
+            if (evento.id.isBlank()) {
+                eventsCollection.add(eventData).await()
+            } else {
+                eventsCollection.document(evento.id).set(eventData).await()
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private fun buildEventData(
+        evento: Evento,
+        now: Timestamp
+    ): HashMap<String, Any?> {
+        val eventName = evento.nombreVisible.ifBlank { evento.titulo }
+        return hashMapOf(
+            "nombre" to eventName,
+            "titulo" to eventName,
+            "fecha" to evento.fecha,
+            "hora" to evento.hora,
+            "ubicacion" to evento.ubicacion,
+            "descripcion" to evento.descripcion,
+            "imagenUrl" to evento.imagenUrl,
+            "pais" to evento.pais,
+            "ciudad" to evento.ciudad,
+            "direccion" to evento.direccion,
+            "latitud" to evento.latitud,
+            "longitud" to evento.longitud,
+            "estado" to if (evento.estado.isBlank()) "activo" else evento.estado,
+            "categoria" to evento.categoria,
+            "contactoOrganizador" to evento.contactoOrganizador,
+            "precio" to if (evento.gratis) 0.0 else evento.precio,
+            "etiquetas" to evento.etiquetas,
+            "modalidad" to evento.modalidad.lowercase(),
+            "organizadorId" to evento.organizadorId,
+            "organizadorNombre" to evento.organizadorNombre,
+            "distanciaKm" to evento.distanciaKm,
+            "destacado" to evento.destacado,
+            "capacidad" to evento.capacidad,
+            "gratis" to evento.gratis,
+            "createdAt" to (evento.createdAt ?: now),
+            "updatedAt" to now
+        )
+    }
+
     private suspend fun uploadEventImage(eventId: String, imageUri: Uri): String {
         val extension = imageUri.lastPathSegment?.substringAfterLast('.', "jpg") ?: "jpg"
         val imageRef = storage.reference
-            .child("eventos")
+            .child(COLLECTION_EVENTS)
             .child(eventId)
             .child("${UUID.randomUUID()}.$extension")
 
         imageRef.putFile(imageUri).await()
         return imageRef.downloadUrl.await().toString()
     }
+
     fun observeMyEvents(organizadorId: String): Flow<Result<List<Evento>>> = callbackFlow {
-        val subscription = firestore.collection("eventos")
+        val subscription = eventsCollection
             .whereEqualTo("organizadorId", organizadorId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     trySend(Result.failure(error))
                     return@addSnapshotListener
                 }
-                if (snapshot != null) {
-                    val events = snapshot.toObjects(Evento::class.java)
-                    trySend(Result.success(events))
-                }
+
+                val events = snapshot?.documents
+                    ?.mapNotNull { document -> document.toEventoOrNull() }
+                    .orEmpty()
+
+                trySend(Result.success(events))
             }
+
         awaitClose { subscription.remove() }
     }
 
     suspend fun deleteEvent(eventId: String): Result<Boolean> {
         return try {
-            firestore.collection("eventos").document(eventId).delete().await()
+            eventsCollection.document(eventId).delete().await()
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
+
+    suspend fun getAllEvents(): Result<List<Evento>> {
+        return try {
+            val snapshot = eventsCollection.get().await()
+            val eventos = snapshot.documents.mapNotNull { document ->
+                document.toEventoOrNull()
+            }
+            Result.success(eventos)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     companion object {
         const val COLLECTION_EVENTS = "eventos"
     }

@@ -7,4 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="parchate_background">#FF1E1C32</color>
+    <color name="parchate_accent">#FFFF5277</color>
 </resources>

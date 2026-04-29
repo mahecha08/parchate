@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -21,6 +22,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -31,6 +34,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,22 +57,6 @@ import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.viewmodel.HomeViewModel
 
-private val categorias = listOf(
-    R.string.categoria_todos,
-    R.string.categoria_concierto,
-    R.string.categoria_festival,
-    R.string.categoria_teatro,
-    R.string.categoria_feria,
-    R.string.categoria_cultural,
-    R.string.categoria_deportes,
-    R.string.categoria_tecnologia
-)
-private val modalidades = listOf(
-    R.string.modalidad_todas,
-    R.string.modalidad_presencial,
-    R.string.modalidad_online
-)
-
 @Composable
 fun HomeScreen(
     onNavigateToCreate: () -> Unit = {},
@@ -79,10 +67,27 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showFilters by rememberSaveable { mutableStateOf(false) }
-
-    // Resolve string resource IDs outside LazyColumn
-    val categoriasResueltas = categorias.map { stringResource(it) }
-    val modalidadesResueltas = modalidades.map { stringResource(it) }
+    val allCategoryLabel = stringResource(R.string.categoria_todos)
+    val allModalityLabel = stringResource(R.string.modalidad_todas)
+    val presencialLabel = stringResource(R.string.modalidad_presencial)
+    val onlineLabel = stringResource(R.string.modalidad_online)
+    val availableCategories = remember(uiState.events, allCategoryLabel) {
+        listOf(allCategoryLabel) + uiState.events
+            .map { it.categoria.trim() }
+            .filter { it.isNotBlank() }
+            .distinctBy { it.lowercase() }
+            .sortedBy { it.lowercase() }
+    }
+    val modalityOptions = remember(allModalityLabel, presencialLabel, onlineLabel) {
+        listOf(allModalityLabel, presencialLabel, onlineLabel)
+    }
+    val hasActiveFilters = remember(uiState.filters, allCategoryLabel, allModalityLabel) {
+        uiState.filters.search.isNotBlank() ||
+            !uiState.filters.categoria.equals(allCategoryLabel, ignoreCase = true) ||
+            uiState.filters.ciudad.isNotBlank() ||
+            uiState.filters.soloGratis ||
+            !uiState.filters.modalidad.equals(allModalityLabel, ignoreCase = true)
+    }
 
     Scaffold(
         bottomBar = {
@@ -108,7 +113,12 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = stringResource(R.string.home_titulo), color = RosadoNeon, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.home_titulo),
+                    color = RosadoNeon,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -129,18 +139,56 @@ fun HomeScreen(
 
             if (showFilters) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = stringResource(R.string.home_filtros), color = Color.White, style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                LazyColumn(
-                    modifier = Modifier.height(160.dp),
-                    contentPadding = PaddingValues(bottom = 8.dp)
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF25233D)),
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    item {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            categoriasResueltas.take(4).forEach { categoria ->
+                    Column(
+                        modifier = Modifier.padding(vertical = 14.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.home_filtros),
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    text = "${uiState.filteredEvents.size} eventos encontrados",
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+
+                            if (hasActiveFilters) {
+                                TextButton(onClick = viewModel::clearFilters) {
+                                    Text("Limpiar", color = RosadoNeon)
+                                }
+                            }
+                        }
+
+                        Text(
+                            text = stringResource(R.string.create_categoria),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(availableCategories, key = { it.lowercase() }) { categoria ->
                                 FilterChip(
-                                    selected = uiState.filters.categoria == categoria,
+                                    selected = uiState.filters.categoria.equals(categoria, ignoreCase = true),
                                     onClick = {
                                         viewModel.updateFilters { it.copy(categoria = categoria) }
                                     },
@@ -148,23 +196,7 @@ fun HomeScreen(
                                 )
                             }
                         }
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            categoriasResueltas.drop(4).forEach { categoria ->
-                                FilterChip(
-                                    selected = uiState.filters.categoria == categoria,
-                                    onClick = {
-                                        viewModel.updateFilters { it.copy(categoria = categoria) }
-                                    },
-                                    label = { Text(categoria) }
-                                )
-                            }
-                        }
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(10.dp))
+
                         cajasTexto(
                             value = uiState.filters.ciudad,
                             onValueChange = { city ->
@@ -172,24 +204,51 @@ fun HomeScreen(
                             },
                             label = stringResource(R.string.home_filtrar_ciudad)
                         )
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            modalidadesResueltas.forEach { modalidad ->
-                                AssistChip(
+
+                        Text(
+                            text = stringResource(R.string.create_modalidad),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(modalityOptions, key = { it }) { modalidad ->
+                                FilterChip(
+                                    selected = uiState.filters.modalidad.equals(modalidad, ignoreCase = true),
                                     onClick = {
                                         viewModel.updateFilters { it.copy(modalidad = modalidad) }
                                     },
-                                    label = { Text(modalidad) }
+                                    label = {
+                                        Text(
+                                            modalidad.replaceFirstChar { char ->
+                                                if (char.isLowerCase()) char.titlecase() else char.toString()
+                                            }
+                                        )
+                                    }
                                 )
                             }
+                        }
+
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             FilterChip(
                                 selected = uiState.filters.soloGratis,
                                 onClick = {
                                     viewModel.updateFilters { it.copy(soloGratis = !it.soloGratis) }
                                 },
                                 label = { Text(stringResource(R.string.home_solo_gratis)) }
+                            )
+
+                            AssistChip(
+                                onClick = {},
+                                label = { Text("${uiState.filteredEvents.size} resultados") }
                             )
                         }
                     }
@@ -263,7 +322,7 @@ fun BottomNavParchate(
         )
         NavigationBarItem(
             selected = false,
-            onClick = { onAddClick() },
+            onClick = onAddClick,
             icon = {
                 Icon(
                     imageVector = Icons.Default.AddCircle,

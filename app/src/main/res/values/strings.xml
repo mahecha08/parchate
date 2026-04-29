@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">parchate</string>
-    <string name="start_title">PARCHATE </string>
+    <string name="app_name">Parchate</string>
+    <string name="start_title">PARCHATE</string>
 
     <string name="login_header">PARCHATE</string>
     <string name="login_correo">Correo Electronico</string>
-    <string name="login_contraseña"> Contraseña</string>
+    <string name="login_contraseña">Contraseña</string>
     <string name="login_loginbutton">INICIAR SESIÓN</string>
     <string name="login_olvidarpass">¿Olvidaste tu contraseña?</string>
     <string name="login_nocuenta">¿No tienes cuenta? </string>
@@ -15,7 +15,6 @@
     <string name="login_errorConexion">Error de conexión. Inténtalo de nuevo.</string>
     <string name="login_errorCamposIncompletos">Por favor completa todos los campos.</string>
 
-    <!-- RegisterScreen -->
     <string name="register_titulo">Regístrate en Parchate</string>
     <string name="register_nombres">Nombres y Apellidos</string>
     <string name="register_cedula">Cédula</string>
@@ -36,7 +35,6 @@
     <string name="register_yacuenta">¿Ya tienes cuenta? Iniciar Sesión</string>
     <string name="register_atras">Atrás</string>
 
-    <!-- ForgotPasswordScreen -->
     <string name="forgot_titulo">¿Olvidaste tu contraseña?</string>
     <string name="forgot_correo_metodo">Correo</string>
     <string name="forgot_telefono_metodo">Teléfono</string>
@@ -48,7 +46,6 @@
     <string name="forgot_correo_label">Correo Electrónico</string>
     <string name="forgot_telefono_label">Número (+57…)</string>
 
-    <!-- VerificationCodeScreen -->
     <string name="verification_revisa_correo">Revisa tu correo</string>
     <string name="verification_verifica_telefono">Verifica tu número</string>
     <string name="verification_enlace_enviado">Hemos enviado un enlace de restablecimiento a:</string>
@@ -73,7 +70,6 @@
     <string name="verification_no_llego_sms">¿No llegó el SMS? Reenviar</string>
     <string name="verification_verificar_codigo">VERIFICAR CÓDIGO</string>
 
-    <!-- HomeScreen -->
     <string name="home_saludo">Hola en el home de inicio</string>
     <string name="home_titulo">PARCHATE</string>
     <string name="home_buscar_eventos">Buscar eventos…</string>
@@ -83,7 +79,6 @@
     <string name="home_no_eventos">No hay eventos con esos filtros</string>
     <string name="home_crear_evento">Crear Evento</string>
 
-    <!-- Categorias -->
     <string name="categoria_todos">Todos</string>
     <string name="categoria_concierto">Concierto</string>
     <string name="categoria_festival">Festival</string>
@@ -93,12 +88,11 @@
     <string name="categoria_deportes">Deportes</string>
     <string name="categoria_tecnologia">Tecnología</string>
 
-    <!-- Modalidades -->
     <string name="modalidad_todas">Todas</string>
     <string name="modalidad_presencial">presencial</string>
     <string name="modalidad_online">online</string>
+    <string name="modalidad_todas_minus">Todas</string>
 
-    <!-- CreateEventScreen -->
     <string name="create_titulo">Registra tu\nEvento</string>
     <string name="create_titulo_evento">Título del evento</string>
     <string name="create_categoria">Categoría</string>
@@ -120,14 +114,10 @@
     <string name="create_cargar_imagen">Cargar Imagen</string>
     <string name="create_imagen_evento">Imagen del evento</string>
 
-    <!-- ForgotPasswordScreen -->
     <string name="forgot_parchate">PARCHATE</string>
-
-    <!-- General -->
     <string name="logo_descripcion">logo</string>
     <string name="atras">Atrás</string>
 
-    <!-- Profile -->
     <string name="profile_titulo">Perfil</string>
     <string name="profile_editar_titulo">Editar perfil</string>
     <string name="profile_nombre">Nombre y Apellido</string>
@@ -140,7 +130,6 @@
     <string name="profile_cambiar_contrasena">Cambia tu contraseña</string>
     <string name="profile_cerrar_sesion">Cerrar sesión</string>
 
-    <!-- MyEventsScreen -->
     <string name="my_events_titulo">Tus eventos</string>
     <string name="my_events_no_eventos">No has creado eventos aún</string>
     <string name="my_events_eliminar_titulo">¿Eliminar evento?</string>
@@ -148,14 +137,9 @@
     <string name="my_events_eliminar">Eliminar</string>
     <string name="my_events_cancelar">Cancelar</string>
 
-    <!-- UpdateEventScreen -->
     <string name="update_titulo">Actualizar Evento</string>
     <string name="update_cambiar_imagen">Cambiar imagen</string>
     <string name="update_guardar_cambios">Guardar Cambios</string>
 
-    <!-- EditProfileScreen -->
     <string name="edit_profile_usuario">Usuario</string>
-
-
-    <string name="modalidad_todas_minus">Todas</string>
 </resources>

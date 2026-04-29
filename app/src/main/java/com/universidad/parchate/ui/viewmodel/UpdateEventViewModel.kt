@@ -21,7 +21,7 @@ data class UpdateEventUiState(
     val ciudad: String = "",
     val precio: String = "",
     val gratis: Boolean = true,
-    val modalidad: String = "Presencial",
+    val modalidad: String = "presencial",
     val organizadorNombre: String = "",
     val contactoOrganizador: String = "",
     val capacidad: String = "",
@@ -47,9 +47,9 @@ class UpdateEventViewModel(
             repository.getEventById(eventId).onSuccess { evento ->
                 evento?.let { e ->
                     _uiState.update { it.copy(
-                        titulo = e.titulo,
+                        titulo = e.nombreVisible,
                         descripcion = e.descripcion,
-                        categoria = e.categoria,
+                        categoria = e.categoria.ifBlank { "Concierto" },
                         fecha = e.fecha,
                         hora = e.hora,
                         ubicacion = e.ubicacion,
@@ -57,7 +57,7 @@ class UpdateEventViewModel(
                         ciudad = e.ciudad,
                         precio = e.precio?.toString() ?: "",
                         gratis = e.gratis,
-                        modalidad = e.modalidad,
+                        modalidad = e.modalidad.ifBlank { "presencial" },
                         organizadorNombre = e.organizadorNombre,
                         contactoOrganizador = e.contactoOrganizador,
                         capacidad = e.capacidad?.toString() ?: "",

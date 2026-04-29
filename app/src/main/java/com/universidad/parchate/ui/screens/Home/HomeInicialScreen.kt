@@ -73,6 +73,7 @@ private val modalidades = listOf(
 fun HomeScreen(
     onNavigateToCreate: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
+    onNavigateToCalendar: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     viewModel: HomeViewModel = viewModel()
 ) {
@@ -88,6 +89,7 @@ fun HomeScreen(
             BottomNavParchate(
                 onAddClick = onNavigateToCreate,
                 onMapClick = onNavigateToMap,
+                onFavoriteClick = onNavigateToCalendar,
                 onProfileClick = onNavigateToProfile
             )
         },
@@ -221,7 +223,15 @@ fun HomeScreen(
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
                         items(uiState.filteredEvents, key = { it.id }) { evento ->
-                            EventCard(evento = evento, onDetailClick = { })
+                            EventCard(
+                                evento = evento,
+                                isFavorite = uiState.favoriteEventIds.contains(evento.id),
+                                onFavoriteClick = {
+                                    viewModel.toggleFavorite(evento.id)
+                                },
+                                onDetailClick = { }
+                            )
+
                         }
                     }
                 }
@@ -235,6 +245,7 @@ fun BottomNavParchate(
     onAddClick: () -> Unit,
     onMapClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
+    onFavoriteClick: () -> Unit = {},
     onProfileClick: () -> Unit = {}
 ) {
     NavigationBar(
@@ -267,7 +278,7 @@ fun BottomNavParchate(
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onFavoriteClick,
             icon = { Icon(Icons.Default.Favorite, contentDescription = null, tint = Color.White) },
             colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent)
         )

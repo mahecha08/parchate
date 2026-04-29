@@ -15,6 +15,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -38,6 +41,8 @@ import com.universidad.parchate.ui.theme.TextoSecundario
 @Composable
 fun EventCard(
     evento: Evento,
+    isFavorite: Boolean = false,
+    onFavoriteClick: () -> Unit = {},
     onDetailClick: () -> Unit
 ) {
     Card(
@@ -48,26 +53,41 @@ fun EventCard(
         colors = CardDefaults.cardColors(containerColor = Color(0xFF25233D))
     ) {
         Column {
-            if (evento.imagenUrl.isNotBlank()) {
-                AsyncImage(
-                    model = evento.imagenUrl,
-                    contentDescription = evento.titulo,
+            Box {
+                if (evento.imagenUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = evento.imagenUrl,
+                        contentDescription = evento.titulo,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                            .background(Color(0xFF35325E)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Sin imagen", color = TextoSecundario, fontSize = 14.sp)
+                    }
+                }
+
+                IconButton(
+                    onClick = onFavoriteClick,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
-                        .background(Color(0xFF35325E)),
-                    contentAlignment = Alignment.Center
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
                 ) {
-                    Text("Sin imagen", color = TextoSecundario, fontSize = 14.sp)
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = null,
+                        tint = if (isFavorite) RosadoNeon else Color.White
+                    )
                 }
             }
 
@@ -98,15 +118,33 @@ fun EventCard(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Schedule, contentDescription = null, tint = RosadoNeon, modifier = Modifier.size(16.dp))
+                        Icon(
+                            Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = RosadoNeon,
+                            modifier = Modifier.size(16.dp)
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "${evento.fecha} · ${evento.hora}", color = TextoSecundario, fontSize = 12.sp)
+                        Text(
+                            text = "${evento.fecha} · ${evento.hora}",
+                            color = TextoSecundario,
+                            fontSize = 12.sp
+                        )
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.LocationOn, contentDescription = null, tint = RosadoNeon, modifier = Modifier.size(16.dp))
+                        Icon(
+                            Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = RosadoNeon,
+                            modifier = Modifier.size(16.dp)
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "${evento.ubicacion}, ${evento.ciudad}", color = TextoSecundario, fontSize = 12.sp)
+                        Text(
+                            text = "${evento.ubicacion}, ${evento.ciudad}",
+                            color = TextoSecundario,
+                            fontSize = 12.sp
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -127,9 +165,15 @@ fun EventCard(
                     colors = ButtonDefaults.buttonColors(containerColor = RosadoNeon),
                     shape = RoundedCornerShape(15.dp)
                 ) {
-                    Text("Ver Detalles", fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Ver Detalles",
+                        fontSize = 10.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
     }
 }
+

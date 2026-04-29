@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 
 data class HomeFilterState(
@@ -21,20 +23,23 @@ data class HomeFilterState(
 data class HomeUiState(
     val isLoading: Boolean = true,
     val events: List<Evento> = emptyList(),
+    val favoriteEventIds: List<String> = emptyList(),
     val filteredEvents: List<Evento> = emptyList(),
     val errorMessage: String? = null,
     val filters: HomeFilterState = HomeFilterState()
 )
 
 class HomeViewModel(
-    private val repository: EventRepository = EventRepository()
-) : ViewModel() {
+    private val repository: EventRepository = EventRepository(),
 
+) : ViewModel() {
+    private val currentUserId = Firebase.auth.currentUser?.uid ?: ""
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
         observeEvents()
+        observeFavorites()
     }
 
     private fun observeEvents() {
@@ -62,6 +67,52 @@ class HomeViewModel(
             }
         }
     }
+
+    private fun observeFavorites() {
+        if (currentUserId.isEmpty()) return
+
+        viewModelScope.launch {
+            repository.observeFavoriteEventIds(currentUserId).collect { result ->
+                result
+                    .onSuccess { ids ->
+                        _uiState.update {
+                            it.copy(favoriteEventIds = ids)
+                        }
+                    }
+                    .onFailure { error ->
+                        _uiState.update {
+                            it.copy(errorMessage = error.message ?: "Error cargando favoritos")
+                        }
+                    }
+            }
+        }
+    }
+
+    fun toggleFavorite(eventId: String) {
+        if (currentUserId.isEmpty()) {
+            _uiState.update {
+                it.copy(errorMessage = "Usuario no autenticado")
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            val isFavorite = _uiState.value.favoriteEventIds.contains(eventId)
+
+            val result = if (isFavorite) {
+                repository.removeFavorite(eventId)
+            } else {
+                repository.addFavorite(eventId)
+            }
+
+            result.onFailure { error ->
+                _uiState.update {
+                    it.copy(errorMessage = error.message ?: "No se pudo actualizar favoritos")
+                }
+            }
+        }
+    }
+
 
     fun updateFilters(transform: (HomeFilterState) -> HomeFilterState) {
         _uiState.update { current ->

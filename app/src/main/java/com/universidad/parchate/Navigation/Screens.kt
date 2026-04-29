@@ -17,6 +17,8 @@ object Register
 @Serializable
 object ForgotPassword
 
+@Serializable
+object Calendar
 
 @Serializable
 data class VerificationCode(

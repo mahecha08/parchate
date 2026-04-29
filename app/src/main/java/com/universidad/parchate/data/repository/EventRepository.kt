@@ -8,6 +8,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.storage
+import com.google.firebase.firestore.FieldPath
 import com.universidad.parchate.data.model.Evento
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -62,6 +63,70 @@ class EventRepository(
 
         awaitClose { listener.remove() }
     }
+
+    fun observeFavoriteEventIds(userId: String): Flow<Result<List<String>>> = callbackFlow {
+        val subscription = firestore
+            .collection("users")
+            .document(userId)
+            .collection("favoritos")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(Result.failure(error))
+                    return@addSnapshotListener
+                }
+
+                val favoriteIds = snapshot?.documents
+                    ?.map { document -> document.id }
+                    .orEmpty()
+
+                trySend(Result.success(favoriteIds))
+            }
+
+        awaitClose { subscription.remove() }
+    }
+
+    suspend fun addFavorite(eventId: String): Result<Boolean> {
+        return try {
+            val userId = auth.currentUser?.uid
+                ?: return Result.failure(Exception("Usuario no autenticado"))
+
+            val data = mapOf(
+                "eventId" to eventId,
+                "createdAt" to Timestamp.now()
+            )
+
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("favoritos")
+                .document(eventId)
+                .set(data)
+                .await()
+
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    suspend fun removeFavorite(eventId: String): Result<Boolean> {
+        return try {
+            val userId = auth.currentUser?.uid
+                ?: return Result.failure(Exception("Usuario no autenticado"))
+
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("favoritos")
+                .document(eventId)
+                .delete()
+                .await()
+
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
     suspend fun createEvent(request: CreateEventRequest): Result<String> {
         return try {

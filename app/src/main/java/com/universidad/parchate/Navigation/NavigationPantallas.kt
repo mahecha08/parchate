@@ -16,6 +16,8 @@ import com.universidad.parchate.ui.screens.Profile.ProfileScreen
 import com.universidad.parchate.ui.screens.Profile.EditProfileScreen
 import com.universidad.parchate.ui.screens.create.CreateEventScreen
 import com.universidad.parchate.ui.screens.start.StartScreen
+import com.universidad.parchate.ui.screens.Calendar.CalendarScreen
+
 
 @Composable
 fun NavigationPantallas() {
@@ -51,6 +53,9 @@ fun NavigationPantallas() {
             HomeScreen(
                 onNavigateToCreate = {
                     navController.navigate(CreateEvent)
+                },
+                onNavigateToCalendar = {
+                    navController.navigate(Calendar)
                 },
                 onNavigateToProfile = {
                     navController.navigate(Profile)
@@ -142,6 +147,12 @@ fun NavigationPantallas() {
                 }
             )
         }
+        composable<Calendar> {
+            CalendarScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
 
 
     }

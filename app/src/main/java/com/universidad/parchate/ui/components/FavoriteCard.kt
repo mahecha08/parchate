@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,7 @@ import coil.compose.AsyncImage
 import com.universidad.parchate.data.model.Evento
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.theme.TextoSecundario
+import com.universidad.parchate.R
 
 @Composable
 fun FavoriteCard(
@@ -99,7 +101,7 @@ fun FavoriteCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Schedule, contentDescription = null, tint = RosadoNeon, modifier = Modifier.size(12.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "Creado ${evento.fecha}", color = TextoSecundario, fontSize = 11.sp)
+                    Text(text = stringResource(R.string.favorites_creado, evento.fecha), color = TextoSecundario, fontSize = 11.sp)
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -113,13 +115,13 @@ fun FavoriteCard(
                     IconButton(onClick = onFavoriteClick) {
                         Icon(
                             if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Favorito",
+                            contentDescription = stringResource(R.string.favorites_favorito),
                             tint = RosadoNeon,
                             modifier = Modifier.size(20.dp)
                         )
                     }
                     IconButton(onClick = onDeleteClick) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Eliminar", tint = RosadoNeon, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.favorites_eliminar), tint = RosadoNeon, modifier = Modifier.size(20.dp))
                     }
                 }
             }

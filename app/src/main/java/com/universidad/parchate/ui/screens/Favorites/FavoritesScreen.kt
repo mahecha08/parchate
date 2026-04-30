@@ -23,12 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.universidad.parchate.ui.components.FavoriteCard
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.viewmodel.HomeViewModel
+import com.universidad.parchate.R
 
 @Composable
 fun FavoritesScreen(
@@ -52,14 +54,14 @@ fun FavoritesScreen(
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     Icons.Default.ArrowBack,
-                    contentDescription = "Volver",
+                    contentDescription = stringResource(R.string.map_volver),
                     tint = RosadoNeon
                 )
             }
         }
 
         Text(
-            text = "Mis Favoritos",
+            text = stringResource(R.string.favorites_mis_favoritos),
             color = RosadoNeon,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
@@ -76,7 +78,7 @@ fun FavoritesScreen(
             favoriteEvents.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Aún no tienes eventos favoritos",
+                        text = stringResource(R.string.favorites_sin_favoritos),
                         color = Color.White,
                         fontSize = 16.sp
                     )

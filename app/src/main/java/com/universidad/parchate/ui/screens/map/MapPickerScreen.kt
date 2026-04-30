@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
@@ -69,6 +70,7 @@ import com.universidad.parchate.data.repository.LocationRepository
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.viewmodel.MapPickerViewModel
+import com.universidad.parchate.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -94,6 +96,8 @@ fun MapPickerScreen(
     val locationRepository = remember { LocationRepository(context) }
     val coroutineScope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
+    val noLugaresMsg = stringResource(R.string.map_no_encontramos_lugares)
+    val noPudimosMsg = stringResource(R.string.map_no_pudimos_ubicacion)
 
     var hasLocationPermission by remember {
         mutableStateOf(
@@ -164,7 +168,7 @@ fun MapPickerScreen(
         )
         searchResults = results
         searchErrorMessage = if (results.isEmpty()) {
-            "No encontramos lugares con ese nombre"
+            noLugaresMsg
         } else {
             null
         }
@@ -202,7 +206,7 @@ fun MapPickerScreen(
         containerColor = BackgroundPrincipal,
         topBar = {
             TopAppBar(
-                title = { Text("Seleccionar ubicación") },
+                title = { Text(stringResource(R.string.map_seleccionar_ubicacion)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF25233D),
                     titleContentColor = Color.White,
@@ -212,7 +216,7 @@ fun MapPickerScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(R.string.map_volver)
                         )
                     }
                 }
@@ -240,7 +244,7 @@ fun MapPickerScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Confirmar ubicación"
+                        contentDescription = stringResource(R.string.map_confirmar_ubicacion)
                     )
                 }
 
@@ -264,7 +268,7 @@ fun MapPickerScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.MyLocation,
-                        contentDescription = "Mi ubicación"
+                        contentDescription = stringResource(R.string.map_mi_ubicacion)
                     )
                 }
             }
@@ -299,7 +303,7 @@ fun MapPickerScreen(
                 viewModel.selectedLatLng?.let { selected ->
                     Marker(
                         state = MarkerState(position = selected),
-                        title = "Ubicación seleccionada"
+                        title = stringResource(R.string.map_ubicacion_seleccionada_marker)
                     )
                 }
             }
@@ -328,7 +332,7 @@ fun MapPickerScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = {
-                            Text("Buscar lugar, barrio o dirección")
+                            Text(stringResource(R.string.map_buscar_lugar))
                         },
                         leadingIcon = {
                             Icon(
@@ -355,7 +359,7 @@ fun MapPickerScreen(
                                 } else {
                                     Icon(
                                         imageVector = Icons.Default.Search,
-                                        contentDescription = "Buscar",
+                                        contentDescription = stringResource(R.string.map_buscar),
                                         tint = RosadoNeon
                                     )
                                 }
@@ -425,8 +429,7 @@ fun MapPickerScreen(
                                                         addressResult = result.asAddressResult()
                                                     )
                                                 } else {
-                                                    searchErrorMessage =
-                                                        "No pudimos obtener la ubicación exacta"
+                                                    searchErrorMessage = noPudimosMsg
                                                 }
 
                                                 isSearching = false
@@ -441,10 +444,9 @@ fun MapPickerScreen(
                                             modifier = Modifier.padding(12.dp),
                                             verticalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
+                                            val lugarFound = stringResource(R.string.map_lugar_encontrado)
                                             Text(
-                                                text = suggestion.primaryText.ifBlank {
-                                                    "Lugar encontrado"
-                                                },
+                                                text = suggestion.primaryText.ifBlank { lugarFound },
                                                 color = Color.White,
                                                 style = MaterialTheme.typography.titleSmall
                                             )
@@ -477,7 +479,7 @@ fun MapPickerScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Ubicación seleccionada",
+                        text = stringResource(R.string.map_ubicacion_seleccionada),
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -488,20 +490,21 @@ fun MapPickerScreen(
                             color = RosadoNeon
                         )
                     } else {
+                        val noDisponible = stringResource(R.string.map_no_disponible)
                         Text(
-                            text = "País: ${uiState.pais.ifBlank { "No disponible" }}",
+                            text = stringResource(R.string.map_label_pais, uiState.pais.ifBlank { noDisponible }),
                             color = Color.White
                         )
                         Text(
-                            text = "Ciudad: ${uiState.ciudad.ifBlank { "No disponible" }}",
+                            text = stringResource(R.string.map_label_ciudad, uiState.ciudad.ifBlank { noDisponible }),
                             color = Color.White
                         )
                         Text(
-                            text = "Dirección: ${uiState.direccion.ifBlank { "No disponible" }}",
+                            text = stringResource(R.string.map_label_direccion, uiState.direccion.ifBlank { noDisponible }),
                             color = Color.White
                         )
                         Text(
-                            text = "Lugar: ${uiState.ubicacion.ifBlank { "No disponible" }}",
+                            text = stringResource(R.string.map_label_lugar, uiState.ubicacion.ifBlank { noDisponible }),
                             color = Color.White
                         )
                     }
@@ -533,7 +536,7 @@ fun MapPickerScreen(
                         enabled = viewModel.selectedLatLng != null && !uiState.isResolvingAddress
                     ) {
                         Text(
-                            text = "Usar esta ubicación",
+                            text = stringResource(R.string.map_usar_esta_ubicacion),
                             color = Color.White
                         )
                     }

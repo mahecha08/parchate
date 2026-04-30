@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,12 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.universidad.parchate.ui.components.FavoriteCard
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.viewmodel.HomeViewModel
+import com.universidad.parchate.R
 
 @Composable
 fun FavoritesScreen(
@@ -51,15 +53,15 @@ fun FavoritesScreen(
         ) {
             IconButton(onClick = onNavigateBack) {
                 Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Volver",
+                    Icons.Default.ArrowBack,
+                    contentDescription = stringResource(R.string.map_volver),
                     tint = RosadoNeon
                 )
             }
         }
 
         Text(
-            text = "Mis Favoritos",
+            text = stringResource(R.string.favorites_mis_favoritos),
             color = RosadoNeon,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
@@ -76,7 +78,7 @@ fun FavoritesScreen(
             favoriteEvents.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Aún no tienes eventos favoritos",
+                        text = stringResource(R.string.favorites_sin_favoritos),
                         color = Color.White,
                         fontSize = 16.sp
                     )

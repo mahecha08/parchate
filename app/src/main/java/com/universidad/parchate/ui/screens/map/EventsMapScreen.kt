@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,6 +77,7 @@ import com.universidad.parchate.ui.theme.RosadoNeonBack
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.theme.TextoSecundario
 import com.universidad.parchate.ui.viewmodel.EventsMapViewModel
+import com.universidad.parchate.R
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -172,7 +174,7 @@ fun EventsMapScreen(
         containerColor = BackgroundPrincipal,
         topBar = {
             TopAppBar(
-                title = { Text("Eventos en el mapa") },
+                title = { Text(stringResource(R.string.map_eventos_en_mapa)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF25233D),
                     titleContentColor = Color.White,
@@ -180,7 +182,7 @@ fun EventsMapScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.map_volver))
                     }
                 }
             )
@@ -204,7 +206,7 @@ fun EventsMapScreen(
                 containerColor = RosadoNeon,
                 contentColor = Color.White
             ) {
-                Icon(Icons.Default.MyLocation, contentDescription = "Solicitar ubicación")
+                Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.map_solicitar_ubicacion))
             }
         }
     ) { paddingValues ->
@@ -258,7 +260,7 @@ fun EventsMapScreen(
                     colors = CardDefaults.cardColors(containerColor = Color(0xE625233D))
                 ) {
                     Text(
-                        text = "${uiState.events.size} eventos visibles",
+                        text = stringResource(R.string.map_eventos_visibles, uiState.events.size),
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         color = Color.White,
                         style = MaterialTheme.typography.labelLarge
@@ -328,8 +330,9 @@ private fun EventSpotlightCard(
                         .background(RosadoNeonBack, MaterialTheme.shapes.large),
                     contentAlignment = Alignment.Center
                 ) {
+                    val inicialCat = stringResource(R.string.map_inicial_categoria)
                     Text(
-                        text = event.categoria.take(1).ifBlank { "E" },
+                        text = event.categoria.take(1).ifBlank { inicialCat },
                         color = BackgroundPrincipal,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Black
@@ -343,12 +346,13 @@ private fun EventSpotlightCard(
                     .padding(start = 14.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val categoriaEvento = stringResource(R.string.map_evento)
                     Surface(
                         color = RosadoNeon,
                         shape = MaterialTheme.shapes.small
                     ) {
                         Text(
-                            text = event.categoria.ifBlank { "Evento" },
+                            text = event.categoria.ifBlank { categoriaEvento },
                             color = Color.White,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                             fontSize = 12.sp,
@@ -357,13 +361,14 @@ private fun EventSpotlightCard(
                     }
 
                     if (event.gratis || (event.precio ?: 0.0) == 0.0) {
+                        val gratisText = stringResource(R.string.map_gratis)
                         Surface(
                             modifier = Modifier.padding(start = 8.dp),
                             color = Color(0xFFFFE0E8),
                             shape = MaterialTheme.shapes.small
                         ) {
                             Text(
-                                text = "Gratis",
+                                text = gratisText,
                                 color = RosadoNeon,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                 fontSize = 12.sp,
@@ -393,8 +398,9 @@ private fun EventSpotlightCard(
                         tint = RosadoNeon,
                         modifier = Modifier.size(16.dp)
                     )
+                    val ubicacionPorConfirmar = stringResource(R.string.map_ubicacion_por_confirmar)
                     Text(
-                        text = event.ubicacion.ifBlank { event.ciudad.ifBlank { "Ubicacion por confirmar" } },
+                        text = event.ubicacion.ifBlank { event.ciudad.ifBlank { ubicacionPorConfirmar } },
                         color = TextoSecundario,
                         fontSize = 13.sp,
                         maxLines = 1,
@@ -413,11 +419,13 @@ private fun EventSpotlightCard(
                         tint = RosadoNeon,
                         modifier = Modifier.size(16.dp)
                     )
+                    val fechaPorDefinir = stringResource(R.string.map_fecha_por_definir)
+                    val separador = stringResource(R.string.map_separador_hora)
                     Text(
                         text = buildString {
-                            append(event.fecha.ifBlank { "Fecha por definir" })
+                            append(event.fecha.ifBlank { fechaPorDefinir })
                             if (event.hora.isNotBlank()) {
-                                append(" · ")
+                                append(separador)
                                 append(event.hora)
                             }
                         },
@@ -439,7 +447,7 @@ private fun EventSpotlightCard(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "$ ${event.precio?.toInt() ?: 0}",
+                            text = stringResource(R.string.map_precio_formato, event.precio?.toInt() ?: 0),
                             color = BackgroundPrincipal,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,

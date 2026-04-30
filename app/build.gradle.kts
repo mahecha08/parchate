@@ -14,8 +14,14 @@ val localProperties = Properties().apply {
     }
 }
 
-val mapsApiKey = localProperties.getProperty("MAPS_API_KEY", "")
-val placesApiKey = localProperties.getProperty("PLACES_API_KEY", mapsApiKey)
+val mapsApiKey = localProperties.getProperty("MAPS_API_KEY")
+    ?: (findProperty("MAPS_API_KEY") as String?)
+    ?: System.getenv("MAPS_API_KEY")
+    ?: ""
+val placesApiKey = localProperties.getProperty("PLACES_API_KEY")
+    ?: (findProperty("PLACES_API_KEY") as String?)
+    ?: System.getenv("PLACES_API_KEY")
+    ?: mapsApiKey
 
 android {
     namespace = "com.universidad.parchate"

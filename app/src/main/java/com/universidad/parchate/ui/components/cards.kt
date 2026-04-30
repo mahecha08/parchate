@@ -54,39 +54,44 @@ fun EventCard(
         colors = CardDefaults.cardColors(containerColor = Color(0xFF25233D))
     ) {
         Column {
-            if (evento.imagenUrl.isNotBlank()) {
-                AsyncImage(
-                    model = evento.imagenUrl,
-                    contentDescription = evento.nombreVisible,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = 30.dp,
-                                topEnd = 30.dp
-                            )
-                        ),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = 30.dp,
-                                topEnd = 30.dp
-                            )
+            Box {
+                if (evento.imagenUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = evento.imagenUrl,
+                        contentDescription = evento.nombreVisible,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
+                            .background(Color(0xFF35325E)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Sin imagen",
+                            color = TextoSecundario,
+                            fontSize = 14.sp
                         )
-                        .background(Color(0xFF35325E)),
-                    contentAlignment = Alignment.Center
+                    }
+                }
+
+                IconButton(
+                    onClick = onFavoriteClick,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(10.dp)
                 ) {
-                    Text(
-                        text = "Sin imagen",
-                        color = TextoSecundario,
-                        fontSize = 14.sp
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = null,
+                        tint = if (isFavorite) RosadoNeon else Color.White
                     )
                 }
             }
@@ -142,7 +147,12 @@ fun EventCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = evento.ubicacion.ifBlank { "Ubicación por definir" },
+                            text = listOf(
+                                evento.ubicacion.ifBlank { "Ubicación por definir" },
+                                evento.ciudad
+                            )
+                                .filter { it.isNotBlank() }
+                                .joinToString(", "),
                             color = TextoSecundario,
                             fontSize = 12.sp
                         )
@@ -169,30 +179,20 @@ fun EventCard(
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onFavoriteClick) {
-                        Icon(
-                            if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = null,
-                            tint = RosadoNeon
-                        )
-                    }
-
-                    Button(
-                        onClick = onDetailClick,
-                        modifier = Modifier
-                            .height(40.dp)
-                            .width(110.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = RosadoNeon),
-                        shape = RoundedCornerShape(15.dp)
-                    ) {
-                        Text(
-                            text = "Ver detalles",
-                            fontSize = 10.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                Button(
+                    onClick = onDetailClick,
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(110.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = RosadoNeon),
+                    shape = RoundedCornerShape(15.dp)
+                ) {
+                    Text(
+                        text = "Ver detalles",
+                        fontSize = 10.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }

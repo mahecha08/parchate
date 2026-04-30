@@ -20,6 +20,8 @@ import com.universidad.parchate.ui.screens.create.CreateEventScreen
 import com.universidad.parchate.ui.screens.map.EventsMapScreen
 import com.universidad.parchate.ui.screens.map.MapPickerScreen
 import com.universidad.parchate.ui.screens.start.StartScreen
+import com.universidad.parchate.ui.screens.Calendar.CalendarScreen
+
 
 object Routes {
     const val START = "start"
@@ -126,6 +128,9 @@ fun NavigationPantallas() {
                 },
                 onNavigateToChatbot = {
                     navController.navigate(Routes.CHATBOT)
+                },
+                onNavigateToCalendar = {
+                    navController.navigate(Calendar)
                 },
                 onNavigateToProfile = {
                     navController.navigate(Profile)
@@ -263,6 +268,12 @@ fun NavigationPantallas() {
                 }
             )
         }
+        composable<Calendar> {
+            CalendarScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
 
         composable<Favorites> {
             FavoritesScreen(

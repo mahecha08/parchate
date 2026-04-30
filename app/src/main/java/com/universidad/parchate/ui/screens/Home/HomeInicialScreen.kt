@@ -15,8 +15,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
@@ -64,6 +65,7 @@ fun HomeScreen(
     onNavigateToCreate: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
     onNavigateToChatbot: () -> Unit = {},
+    onNavigateToCalendar: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     viewModel: HomeViewModel = viewModel()
@@ -134,6 +136,14 @@ fun HomeScreen(
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
+
+                IconButton(onClick = onNavigateToCalendar) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarMonth,
+                        contentDescription = stringResource(R.string.home_abrir_calendario),
+                        tint = Color.White
+                    )
+                }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -246,6 +246,10 @@ fun EventsMapScreen(
                 }
             }
 
+            if (!isMapsConfigured) {
+                MapConfigurationWarning()
+            }
+
             if (!uiState.isLoading && uiState.errorMessage == null) {
                 Card(
                     modifier = Modifier

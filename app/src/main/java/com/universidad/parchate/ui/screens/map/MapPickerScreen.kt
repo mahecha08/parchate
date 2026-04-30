@@ -304,6 +304,10 @@ fun MapPickerScreen(
                 }
             }
 
+            if (!isMapsConfigured) {
+                MapConfigurationWarning()
+            }
+
             Card(
                 modifier = Modifier
                     .align(Alignment.TopCenter)

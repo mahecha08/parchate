@@ -59,6 +59,12 @@ fun LoginScreen(
     val errorConexion = stringResource(R.string.login_errorConexion)
     val errorCamposIncompletos = stringResource(R.string.login_errorCamposIncompletos)
 
+    LaunchedEffect(Unit) {
+        if (auth.currentUser?.isEmailVerified == true) {
+            navigationToHome()
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()

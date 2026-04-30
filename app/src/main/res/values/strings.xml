@@ -78,6 +78,7 @@
     <string name="home_solo_gratis">Solo gratis</string>
     <string name="home_no_eventos">No hay eventos con esos filtros</string>
     <string name="home_crear_evento">Crear Evento</string>
+    <string name="home_abrir_chat">Abrir chat</string>
 
     <string name="categoria_todos">Todos</string>
     <string name="categoria_concierto">Concierto</string>
@@ -117,6 +118,25 @@
     <string name="forgot_parchate">PARCHATE</string>
     <string name="logo_descripcion">logo</string>
     <string name="atras">Atrás</string>
+    <string name="chatbot_titulo">Chat Parchate</string>
+    <string name="chatbot_subtitulo">Tu aliado para encontrar el plan perfecto</string>
+    <string name="chatbot_estado_demo">Vista previa del chatbot. Más adelante lo conectaremos con la IA.</string>
+    <string name="chatbot_sugerencias">Sugerencias rápidas</string>
+    <string name="chatbot_input">Escribe qué tipo de plan quieres...</string>
+    <string name="chatbot_enviar">Enviar mensaje</string>
+    <string name="chatbot_quick_gratis">Gratis hoy</string>
+    <string name="chatbot_quick_online">Planes online</string>
+    <string name="chatbot_quick_cerca">Cerca de mí</string>
+    <string name="chatbot_quick_bailar">Salir a bailar</string>
+    <string name="chatbot_quick_fin_semana">Fin de semana</string>
+    <string name="chatbot_bienvenida">Hola, soy tu asistente de Parchate. Aquí después te ayudaré a descubrir eventos según tu ciudad, presupuesto y antojos.</string>
+    <string name="chatbot_bienvenida_extra">Por ahora esta pantalla es una demo para mostrar cómo se verá la experiencia del chat dentro de la app.</string>
+    <string name="chatbot_preview_gratis">Cuando conectemos la IA, aquí te recomendaré planes gratuitos y te diré cuáles valen la pena hoy mismo.</string>
+    <string name="chatbot_preview_online">Aquí podré filtrar eventos virtuales para que encuentres talleres, charlas o conciertos online.</string>
+    <string name="chatbot_preview_cerca">Luego te mostraré eventos cercanos usando tu ubicación y el mapa de la app.</string>
+    <string name="chatbot_preview_bailar">También podré sugerirte rumba, fiestas y eventos con mejor ambiente según lo que te guste.</string>
+    <string name="chatbot_preview_fin_semana">La idea es que te prepare un mini plan de fin de semana con varias opciones.</string>
+    <string name="chatbot_preview_default">Anotado. Cuando conectemos la IA, este chat te responderá con eventos reales, horarios y recomendaciones personalizadas.</string>
 
     <string name="profile_titulo">Perfil</string>
     <string name="profile_editar_titulo">Editar perfil</string>

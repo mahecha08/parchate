@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
@@ -26,6 +27,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,6 +63,7 @@ import com.universidad.parchate.ui.viewmodel.HomeViewModel
 fun HomeScreen(
     onNavigateToCreate: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
+    onNavigateToChatbot: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     viewModel: HomeViewModel = viewModel()
@@ -97,6 +100,18 @@ fun HomeScreen(
                 onProfileClick = onNavigateToProfile,
                 onFavoritesClick = onNavigateToFavorites
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToChatbot,
+                containerColor = RosadoNeon,
+                contentColor = Color.White
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Forum,
+                    contentDescription = stringResource(R.string.home_abrir_chat)
+                )
+            }
         },
         containerColor = BackgroundPrincipal
     ) { padding ->

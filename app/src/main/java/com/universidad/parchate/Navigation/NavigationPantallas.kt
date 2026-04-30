@@ -15,6 +15,7 @@ import com.universidad.parchate.ui.screens.Login.RegisterScreen
 import com.universidad.parchate.ui.screens.Login.VerificationCodeScreen
 import com.universidad.parchate.ui.screens.Profile.EditProfileScreen
 import com.universidad.parchate.ui.screens.Profile.ProfileScreen
+import com.universidad.parchate.ui.screens.chat.ChatbotScreen
 import com.universidad.parchate.ui.screens.create.CreateEventScreen
 import com.universidad.parchate.ui.screens.map.EventsMapScreen
 import com.universidad.parchate.ui.screens.map.MapPickerScreen
@@ -30,6 +31,7 @@ object Routes {
     const val CREATE_EVENT = "create_event"
     const val MAP_PICKER = "map_picker"
     const val EVENTS_MAP = "events_map"
+    const val CHATBOT = "chatbot"
 }
 
 @Composable
@@ -42,6 +44,11 @@ fun NavigationPantallas() {
     ) {
         composable(Routes.START) {
             StartScreen(
+                navigationToHome = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.START) { inclusive = true }
+                    }
+                },
                 navigationToLogin = {
                     navController.navigate(Routes.LOGIN)
                 }
@@ -116,6 +123,9 @@ fun NavigationPantallas() {
                 },
                 onNavigateToMap = {
                     navController.navigate(Routes.EVENTS_MAP)
+                },
+                onNavigateToChatbot = {
+                    navController.navigate(Routes.CHATBOT)
                 },
                 onNavigateToProfile = {
                     navController.navigate(Profile)
@@ -194,6 +204,14 @@ fun NavigationPantallas() {
 
         composable(Routes.EVENTS_MAP) {
             EventsMapScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Routes.CHATBOT) {
+            ChatbotScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

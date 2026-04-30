@@ -5,7 +5,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.storage.storage
 import com.universidad.parchate.data.model.Evento
 import com.universidad.parchate.data.model.toEventoOrNull
@@ -47,8 +46,6 @@ class EventRepository(
 
     fun observeActiveEvents(): Flow<Result<List<Evento>>> = callbackFlow {
         val listener = eventsCollection
-            .orderBy("fecha", Query.Direction.ASCENDING)
-            .orderBy("hora", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     trySend(Result.failure(error))
@@ -58,6 +55,7 @@ class EventRepository(
                 val events = snapshot?.documents
                     ?.mapNotNull { document -> document.toEventoOrNull() }
                     ?.filter { it.estado == "activo" || it.estado.isBlank() }
+                    ?.sortedWith(compareBy<Evento> { it.fecha }.thenBy { it.hora })
                     .orEmpty()
 
                 trySend(Result.success(events))

@@ -20,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.universidad.parchate.R
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
@@ -28,12 +30,21 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun StartScreen(
+    navigationToHome: () -> Unit,
     navigationToLogin: () -> Unit,
     viewModel: StartViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {
         delay(2000)
-        navigationToLogin()
+        val currentUser = Firebase.auth.currentUser
+        when {
+            currentUser?.isEmailVerified == true -> navigationToHome()
+            currentUser != null -> {
+                Firebase.auth.signOut()
+                navigationToLogin()
+            }
+            else -> navigationToLogin()
+        }
     }
 
     Column(

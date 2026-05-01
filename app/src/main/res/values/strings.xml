@@ -168,4 +168,40 @@
     <string name="update_guardar_cambios">Guardar Cambios</string>
 
     <string name="edit_profile_usuario">Usuario</string>
+
+    <!-- Map Module -->
+    <string name="map_eventos_en_mapa">Eventos en el mapa</string>
+    <string name="map_volver">Volver</string>
+    <string name="map_solicitar_ubicacion">Solicitar ubicación</string>
+    <string name="map_eventos_visibles">%1$d eventos visibles</string>
+    <string name="map_evento">Evento</string>
+    <string name="map_gratis">Gratis</string>
+    <string name="map_ubicacion_por_confirmar">Ubicación por confirmar</string>
+    <string name="map_fecha_por_definir">Fecha por definir</string>
+    <string name="map_seleccionar_ubicacion">Seleccionar ubicación</string>
+    <string name="map_confirmar_ubicacion">Confirmar ubicación</string>
+    <string name="map_mi_ubicacion">Mi ubicación</string>
+    <string name="map_buscar_lugar">Buscar lugar, barrio o dirección</string>
+    <string name="map_buscar">Buscar</string>
+    <string name="map_no_encontramos_lugares">No encontramos lugares con ese nombre</string>
+    <string name="map_ubicacion_seleccionada_marker">Ubicación seleccionada</string>
+    <string name="map_ubicacion_seleccionada">Ubicación seleccionada</string>
+    <string name="map_lugar_encontrado">Lugar encontrado</string>
+    <string name="map_no_pudimos_ubicacion">No pudimos obtener la ubicación exacta</string>
+    <string name="map_no_disponible">No disponible</string>
+    <string name="map_usar_esta_ubicacion">Usar esta ubicación</string>
+
+    <!-- Favorites Module -->
+    <string name="favorites_mis_favoritos">Mis Favoritos</string>
+    <string name="favorites_sin_favoritos">Aún no tienes eventos favoritos</string>
+    <string name="favorites_favorito">Favorito</string>
+    <string name="favorites_eliminar">Eliminar</string>
+    <string name="favorites_creado">Creado %1$s</string>
+    <string name="map_inicial_categoria">E</string>
+    <string name="map_separador_hora"> · </string>
+    <string name="map_precio_formato">$ %1$d</string>
+    <string name="map_label_pais">País: %1$s</string>
+    <string name="map_label_ciudad">Ciudad: %1$s</string>
+    <string name="map_label_direccion">Dirección: %1$s</string>
+    <string name="map_label_lugar">Lugar: %1$s</string>
 </resources>

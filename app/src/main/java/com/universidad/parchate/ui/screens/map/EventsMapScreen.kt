@@ -59,7 +59,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,7 +84,6 @@ import com.universidad.parchate.ui.theme.RosadoNeonBack
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.theme.TextoSecundario
 import com.universidad.parchate.ui.viewmodel.EventsMapViewModel
-import com.universidad.parchate.R
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 

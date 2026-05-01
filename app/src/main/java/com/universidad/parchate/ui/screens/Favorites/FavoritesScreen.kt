@@ -47,7 +47,7 @@ fun FavoritesScreen(
     ) {
         Box(
             modifier = Modifier
-                .padding(start = 8.dp, top = 8.dp)
+                .padding(start = 6.dp, top = 8.dp)
         ) {
             IconButton(onClick = onNavigateBack) {
                 Icon(

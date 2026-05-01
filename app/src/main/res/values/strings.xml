@@ -100,6 +100,7 @@
     <string name="create_categoria">Categoría</string>
     <string name="create_fecha_evento">Fecha del evento (AAAA-MM-DD)</string>
     <string name="create_hora_evento">Hora del evento (HH:MM)</string>
+    <string name="create_hora_helper">Toca el campo para elegir la hora</string>
     <string name="create_lugar_evento">Lugar del evento</string>
     <string name="create_direccion">Dirección</string>
     <string name="create_ciudad">Ciudad</string>
@@ -140,6 +141,8 @@
     <string name="chatbot_preview_default">Anotado. Cuando conectemos la IA, este chat te responderá con eventos reales, horarios y recomendaciones personalizadas.</string>
     <string name="map_config_missing_title">Configura Google Maps para ver el mapa</string>
     <string name="map_config_missing_message">En este equipo falta la llave MAPS_API_KEY. Agrégala en local.properties o en tu ~/.gradle/gradle.properties para que el mapa cargue correctamente.</string>
+    <string name="map_event_open_location">Cómo llegar</string>
+    <string name="map_event_details">Detalles del evento</string>
 
     <string name="profile_titulo">Perfil</string>
     <string name="profile_editar_titulo">Editar perfil</string>

@@ -2,14 +2,17 @@ package com.universidad.parchate.ui.screens.map
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,8 +25,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -51,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -59,6 +66,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.universidad.parchate.R
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -96,6 +104,7 @@ fun EventsMapScreen(
         position = CameraPosition.fromLatLngZoom(DefaultWorldCenter, 1.5f)
     }
     var pendingCameraTarget by remember { mutableStateOf<LatLng?>(null) }
+    var pendingCameraZoom by remember { mutableStateOf(14f) }
     var isMapLoaded by remember { mutableStateOf(false) }
     var selectedEventId by rememberSaveable { mutableStateOf<String?>(null) }
     var eventMarkerIcon by remember { mutableStateOf<BitmapDescriptor?>(null) }
@@ -119,6 +128,7 @@ fun EventsMapScreen(
     suspend fun centerOnCurrentLocation() {
         val currentLocation = locationRepository.getCurrentLocation() ?: return
         pendingCameraTarget = LatLng(currentLocation.latitude, currentLocation.longitude)
+        pendingCameraZoom = 14f
     }
 
     LaunchedEffect(hasLocationPermission) {
@@ -130,7 +140,7 @@ fun EventsMapScreen(
     LaunchedEffect(isMapLoaded, pendingCameraTarget) {
         val target = pendingCameraTarget ?: return@LaunchedEffect
         if (isMapLoaded) {
-            cameraPositionState.position = CameraPosition.fromLatLngZoom(target, 14f)
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(target, pendingCameraZoom)
             pendingCameraTarget = null
         }
     }
@@ -163,6 +173,13 @@ fun EventsMapScreen(
 
         if (selectedEventId == null || uiState.events.none { it.id == selectedEventId }) {
             selectedEventId = uiState.events.first().id
+        }
+
+        if (!hasLocationPermission) {
+            uiState.events.firstOrNull { it.latitud != null && it.longitud != null }?.let { firstEvent ->
+                pendingCameraTarget = LatLng(firstEvent.latitud ?: return@let, firstEvent.longitud ?: return@let)
+                pendingCameraZoom = 13.5f
+            }
         }
     }
 
@@ -240,6 +257,7 @@ fun EventsMapScreen(
                         onClick = {
                             selectedEventId = event.id
                             pendingCameraTarget = LatLng(lat, lng)
+                            pendingCameraZoom = 16.5f
                             true
                         }
                     )
@@ -269,6 +287,9 @@ fun EventsMapScreen(
             selectedEvent?.let { event ->
                 EventSpotlightCard(
                     event = event,
+                    onOpenLocation = {
+                        openEventLocation(context, event)
+                    },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(horizontal = 16.dp, vertical = 24.dp)
@@ -299,10 +320,13 @@ fun EventsMapScreen(
 @Composable
 private fun EventSpotlightCard(
     event: Evento,
+    onOpenLocation: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(enabled = onOpenLocation != null, onClick = { onOpenLocation?.invoke() }),
         shape = MaterialTheme.shapes.extraLarge,
         border = BorderStroke(1.5.dp, RosadoNeon.copy(alpha = 0.45f)),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F3F7))
@@ -403,6 +427,28 @@ private fun EventSpotlightCard(
                     )
                 }
 
+                if (event.direccion.isNotBlank()) {
+                    Row(
+                        modifier = Modifier.padding(top = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Map,
+                            contentDescription = null,
+                            tint = RosadoNeon,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = event.direccion,
+                            color = TextoSecundario,
+                            fontSize = 13.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(start = 6.dp)
+                        )
+                    }
+                }
+
                 Row(
                     modifier = Modifier.padding(top = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -447,9 +493,65 @@ private fun EventSpotlightCard(
                         )
                     }
                 }
+
+                if (event.descripcion.isNotBlank()) {
+                    Text(
+                        text = event.descripcion,
+                        color = TextoSecundario,
+                        fontSize = 12.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
+                }
+
+                onOpenLocation?.let { openLocation ->
+                    Button(
+                        onClick = openLocation,
+                        modifier = Modifier.padding(top = 12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = RosadoNeon),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Map,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.map_event_open_location),
+                            color = Color.White,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
             }
         }
     }
+}
+
+private fun openEventLocation(
+    context: android.content.Context,
+    event: Evento
+) {
+    val lat = event.latitud ?: return
+    val lng = event.longitud ?: return
+    val label = event.nombreVisible.ifBlank { event.ubicacion.ifBlank { "Evento" } }
+    val navigationUri = Uri.parse("google.navigation:q=$lat,$lng")
+    val mapsIntent = Intent(Intent.ACTION_VIEW, navigationUri).apply {
+        setPackage("com.google.android.apps.maps")
+    }
+
+    val fallbackUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})")
+    val fallbackIntent = Intent(Intent.ACTION_VIEW, fallbackUri)
+
+    val resolvedIntent = when {
+        mapsIntent.resolveActivity(context.packageManager) != null -> mapsIntent
+        fallbackIntent.resolveActivity(context.packageManager) != null -> fallbackIntent
+        else -> null
+    }
+
+    resolvedIntent?.let(context::startActivity)
 }
 
 private fun createEventMarkerDescriptor(

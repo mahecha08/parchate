@@ -62,9 +62,9 @@ private data class GroqResponse(val choices: List<GroqChoice>)
 class ChatbotViewModel(application: Application) : AndroidViewModel(application) {
 
     // Obtén tu key gratis en console.groq.com → Create API Key
-    private val groqApiKey = "poner key aca"
+    private val groqApiKey = "key aca"
     private val groqUrl = "https://api.groq.com/openai/v1/chat/completions"
-    private val groqModel = "gemma2-9b-it"
+    private val groqModel = "llama-3.1-8b-instant"
 
     private val _uiState = MutableStateFlow(ChatbotUiState())
     val uiState: StateFlow<ChatbotUiState> = _uiState.asStateFlow()
@@ -88,7 +88,7 @@ class ChatbotViewModel(application: Application) : AndroidViewModel(application)
     init {
         addMessage(
             ChatAuthor.Assistant,
-            "¡Hola! Soy Parche, tu asistente de Parchate. " +
+            "¡Hola! Soy CompaIA, tu asistente de Parchate. " +
                 "Cuéntame qué tipo de plan buscas y te ayudo a encontrarlo."
         )
         observeEvents()
@@ -207,12 +207,14 @@ class ChatbotViewModel(application: Application) : AndroidViewModel(application)
         val request = Request.Builder()
             .url(groqUrl)
             .addHeader("Authorization", "Bearer $groqApiKey")
-            .addHeader("Content-Type", "application/json")
             .post(body)
             .build()
 
         val response = http.newCall(request).execute()
-        if (!response.isSuccessful) throw Exception("HTTP ${response.code}")
+        if (!response.isSuccessful) {
+            val errorBody = response.body?.string() ?: "sin cuerpo"
+            throw Exception("HTTP ${response.code}: $errorBody")
+        }
         val responseBody = response.body?.string() ?: throw Exception("Respuesta vacía")
         val reply = json.decodeFromString<GroqResponse>(responseBody).choices.first().message.content
 

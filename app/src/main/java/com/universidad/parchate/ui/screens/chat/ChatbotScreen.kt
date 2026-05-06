@@ -38,9 +38,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -49,7 +46,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -77,7 +73,6 @@ fun ChatbotScreen(
 ) {
     val uiState by vm.uiState.collectAsState()
     val listState = rememberLazyListState()
-    val snackbarHostState = remember { SnackbarHostState() }
     var draftMessage by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
 
@@ -122,23 +117,8 @@ fun ChatbotScreen(
         if (lastIndex >= 0) listState.animateScrollToItem(lastIndex)
     }
 
-    LaunchedEffect(uiState.error) {
-        val error = uiState.error ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(error)
-        vm.clearError()
-    }
-
     Scaffold(
         containerColor = BackgroundPrincipal,
-        snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
-                Snackbar(
-                    snackbarData = data,
-                    containerColor = Color(0xFF3A1A2E),
-                    contentColor = Color.White
-                )
-            }
-        },
         bottomBar = {
             ChatInputBar(
                 value = draftMessage,

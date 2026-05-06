@@ -122,7 +122,7 @@
     <string name="chatbot_titulo">Chat Parchate</string>
     <string name="chatbot_subtitulo">Tu aliado para encontrar el plan perfecto</string>
     <string name="chatbot_estado_demo">Vista previa del chatbot. Más adelante lo conectaremos con la IA.</string>
-    <string name="chatbot_ia_titulo">Parche IA · Gemma4</string>
+    <string name="chatbot_ia_titulo">Parche IA · Groq</string>
     <string name="chatbot_ia_subtitulo">Responde con eventos reales de Parchate</string>
     <string name="chatbot_sugerencias">Sugerencias rápidas</string>
     <string name="chatbot_input">Escribe qué tipo de plan quieres...</string>

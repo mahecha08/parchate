@@ -3,8 +3,6 @@ package com.universidad.parchate.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import com.universidad.parchate.data.model.Evento
 import com.universidad.parchate.data.repository.EventRepository
 import com.universidad.parchate.data.repository.LocationRepository
@@ -24,6 +22,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.concurrent.TimeUnit
+import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 enum class ChatAuthor { User, Assistant }
 
@@ -36,44 +39,32 @@ data class ChatMessage(
 data class ChatbotUiState(
     val messages: List<ChatMessage> = emptyList(),
     val isTyping: Boolean = false,
-    val error: String? = null,
     val hasLocation: Boolean = false
 )
 
 @Serializable
-private data class EventoResumen(
-    val id: String,
-    val nombre: String,
-    val fecha: String,
-    val hora: String,
-    val ubicacion: String,
-    val ciudad: String,
-    val descripcion: String,
-    val categoria: String,
-    val precio: Double?,
-    val gratis: Boolean,
-    val modalidad: String,
-    val etiquetas: List<String>,
-    val latitud: Double?,
-    val longitud: Double?
+private data class GroqMessage(val role: String, val content: String)
+
+@Serializable
+private data class GroqRequest(
+    val model: String,
+    val messages: List<GroqMessage>,
+    val temperature: Double = 0.7,
+    @SerialName("max_tokens") val maxTokens: Int = 1024
 )
 
 @Serializable
-private data class ChatApiRequest(
-    @SerialName("user_id") val userId: String,
-    val message: String,
-    val eventos: List<EventoResumen>,
-    @SerialName("user_lat") val userLat: Double? = null,
-    @SerialName("user_lng") val userLng: Double? = null
-)
+private data class GroqChoice(val message: GroqMessage)
 
 @Serializable
-private data class ChatApiResponse(val reply: String)
+private data class GroqResponse(val choices: List<GroqChoice>)
 
 class ChatbotViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Emulador: 10.0.2.2 | Dispositivo físico: IP local del PC (ej. 192.168.x.x)
-    private val baseUrl = "http://10.0.2.2:8000"
+    // Obtén tu key gratis en console.groq.com → Create API Key
+    private val groqApiKey = "poner key aca"
+    private val groqUrl = "https://api.groq.com/openai/v1/chat/completions"
+    private val groqModel = "gemma2-9b-it"
 
     private val _uiState = MutableStateFlow(ChatbotUiState())
     val uiState: StateFlow<ChatbotUiState> = _uiState.asStateFlow()
@@ -82,14 +73,14 @@ class ChatbotViewModel(application: Application) : AndroidViewModel(application)
     private var cachedEvents: List<Evento> = emptyList()
     private var userLat: Double? = null
     private var userLng: Double? = null
-    private val userId = Firebase.auth.currentUser?.uid ?: "anon_${System.currentTimeMillis()}"
+    private val history = mutableListOf<GroqMessage>()
 
     private val locationRepository = LocationRepository(application)
     private val eventRepository = EventRepository()
 
     private val http = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
         .build()
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -133,64 +124,101 @@ class ChatbotViewModel(application: Application) : AndroidViewModel(application)
         if (clean.isBlank() || _uiState.value.isTyping) return
 
         addMessage(ChatAuthor.User, clean)
-        _uiState.update { it.copy(isTyping = true, error = null) }
+        _uiState.update { it.copy(isTyping = true) }
 
         viewModelScope.launch {
             try {
-                val reply = callChatApi(clean)
+                val reply = callGroq(clean)
                 addMessage(ChatAuthor.Assistant, reply)
             } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(error = "No pude conectarme con el asistente. Verifica que el servidor esté activo.")
-                }
+                addMessage(
+                    ChatAuthor.Assistant,
+                    "⚠️ No pude conectarme. Verifica tu conexión a internet e intenta de nuevo."
+                )
             } finally {
                 _uiState.update { it.copy(isTyping = false) }
             }
         }
     }
 
-    fun clearError() {
-        _uiState.update { it.copy(error = null) }
+    private fun haversineKm(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val R = 6371.0
+        val dlat = Math.toRadians(lat2 - lat1)
+        val dlon = Math.toRadians(lon2 - lon1)
+        val a = sin(dlat / 2).pow(2) +
+            cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dlon / 2).pow(2)
+        return R * 2 * asin(sqrt(a))
     }
 
-    private suspend fun callChatApi(message: String): String = withContext(Dispatchers.IO) {
-        val eventos = cachedEvents.take(40).map { e ->
-            EventoResumen(
-                id = e.id,
-                nombre = e.nombreVisible,
-                fecha = e.fecha,
-                hora = e.hora,
-                ubicacion = e.ubicacion,
-                ciudad = e.ciudad,
-                descripcion = e.descripcion.take(200),
-                categoria = e.categoria,
-                precio = e.precio,
-                gratis = e.gratis,
-                modalidad = e.modalidad.ifBlank { "presencial" },
-                etiquetas = e.etiquetas,
-                latitud = e.latitud,
-                longitud = e.longitud
-            )
+    private fun buildSystemPrompt(): String {
+        val sb = StringBuilder()
+        sb.append(
+            "Eres Parche, el asistente IA de Parchate — una app colombiana para descubrir " +
+                "eventos culturales, deportivos, musicales y de entretenimiento.\n\n" +
+                "Tu rol es ayudar a los usuarios a encontrar el plan perfecto basándote " +
+                "ÚNICAMENTE en los eventos reales listados a continuación.\n" +
+                "- No inventes eventos ni fechas.\n" +
+                "- Si no hay eventos que coincidan, dilo amablemente.\n" +
+                "- Cuando recomiendes un evento incluye: nombre, fecha, hora, lugar, precio y distancia.\n" +
+                "- Responde siempre en español, de forma amigable y concisa (máximo 3-4 eventos).\n\n"
+        )
+
+        val eventos = cachedEvents.take(40)
+        if (eventos.isEmpty()) {
+            sb.append("[No hay eventos disponibles en este momento.]")
+            return sb.toString()
         }
 
-        val body = json.encodeToString(
-            ChatApiRequest(
-                userId = userId,
-                message = message,
-                eventos = eventos,
-                userLat = userLat,
-                userLng = userLng
+        sb.append("=== EVENTOS DISPONIBLES EN PARCHATE ===\n")
+        val hasLoc = userLat != null && userLng != null
+
+        val sorted = eventos
+            .map { e ->
+                val dist = if (hasLoc && e.latitud != null && e.longitud != null)
+                    haversineKm(userLat!!, userLng!!, e.latitud, e.longitud) else null
+                Pair(dist, e)
+            }
+            .sortedWith(compareBy({ it.first == null }, { it.first ?: 0.0 }))
+
+        for ((dist, e) in sorted) {
+            val precio = if (e.gratis) "Gratis" else e.precio?.let { "${"%.0f".format(it)}" } ?: "Gratis"
+            val distStr = dist?.let { "${"%.1f".format(it)} km de ti" } ?: "distancia desconocida"
+            sb.append(
+                "• ${e.nombreVisible} | ${e.categoria} | ${e.fecha} ${e.hora} | " +
+                    "${e.ubicacion}, ${e.ciudad} | $precio | " +
+                    "${e.modalidad.ifBlank { "presencial" }} | $distStr\n"
             )
+            if (e.descripcion.isNotBlank()) sb.append("  ${e.descripcion.take(150)}\n")
+        }
+        sb.append("=== FIN DE EVENTOS ===")
+        return sb.toString()
+    }
+
+    private suspend fun callGroq(message: String): String = withContext(Dispatchers.IO) {
+        history.add(GroqMessage("user", message))
+
+        val messages = mutableListOf(GroqMessage("system", buildSystemPrompt()))
+        messages += history.takeLast(12)
+
+        val body = json.encodeToString(
+            GroqRequest(model = groqModel, messages = messages)
         ).toRequestBody("application/json".toMediaType())
 
         val request = Request.Builder()
-            .url("$baseUrl/chat")
+            .url(groqUrl)
+            .addHeader("Authorization", "Bearer $groqApiKey")
+            .addHeader("Content-Type", "application/json")
             .post(body)
             .build()
 
         val response = http.newCall(request).execute()
         if (!response.isSuccessful) throw Exception("HTTP ${response.code}")
         val responseBody = response.body?.string() ?: throw Exception("Respuesta vacía")
-        json.decodeFromString<ChatApiResponse>(responseBody).reply
+        val reply = json.decodeFromString<GroqResponse>(responseBody).choices.first().message.content
+
+        history.add(GroqMessage("assistant", reply))
+        if (history.size > 20) repeat(history.size - 20) { history.removeAt(0) }
+
+        reply
     }
 }

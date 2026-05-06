@@ -1,5 +1,8 @@
 package com.universidad.parchate.ui.screens.chat
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
@@ -51,10 +55,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.PermissionChecker
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.universidad.parchate.R
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
@@ -73,6 +79,34 @@ fun ChatbotScreen(
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     var draftMessage by rememberSaveable { mutableStateOf("") }
+    val context = LocalContext.current
+
+    // Check and request location permission on first launch
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) vm.fetchUserLocation()
+    }
+
+    LaunchedEffect(Unit) {
+        val alreadyGranted =
+            PermissionChecker.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PermissionChecker.PERMISSION_GRANTED ||
+            PermissionChecker.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PermissionChecker.PERMISSION_GRANTED
+        if (alreadyGranted) {
+            vm.fetchUserLocation()
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
 
     val quickPrompts = listOf(
         stringResource(R.string.chatbot_quick_gratis),
@@ -82,13 +116,12 @@ fun ChatbotScreen(
         stringResource(R.string.chatbot_quick_fin_semana)
     )
 
-    // Scroll to bottom when messages change or typing starts
+    // Scroll to bottom when new messages arrive or typing starts
     LaunchedEffect(uiState.messages.size, uiState.isTyping) {
         val lastIndex = uiState.messages.size - 1 + if (uiState.isTyping) 1 else 0
         if (lastIndex >= 0) listState.animateScrollToItem(lastIndex)
     }
 
-    // Show error in snackbar
     LaunchedEffect(uiState.error) {
         val error = uiState.error ?: return@LaunchedEffect
         snackbarHostState.showSnackbar(error)
@@ -166,7 +199,7 @@ fun ChatbotScreen(
                 }
             }
 
-            // AI status card
+            // AI + location status card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -193,7 +226,7 @@ fun ChatbotScreen(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.chatbot_ia_titulo),
                             color = Color.White,
@@ -206,12 +239,19 @@ fun ChatbotScreen(
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
+
+                    // Location indicator
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        tint = if (uiState.hasLocation) Color(0xFF4CAF50) else TextoSecundario,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Quick prompts
             Text(
                 text = stringResource(R.string.chatbot_sugerencias),
                 color = Color.White,
@@ -227,9 +267,7 @@ fun ChatbotScreen(
             ) {
                 items(quickPrompts, key = { it }) { prompt ->
                     AssistChip(
-                        onClick = {
-                            vm.sendMessage(prompt)
-                        },
+                        onClick = { vm.sendMessage(prompt) },
                         label = { Text(prompt) },
                         enabled = !uiState.isTyping
                     )
@@ -238,7 +276,6 @@ fun ChatbotScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Messages
             LazyColumn(
                 state = listState,
                 modifier = Modifier
@@ -252,9 +289,7 @@ fun ChatbotScreen(
                 }
 
                 if (uiState.isTyping) {
-                    item(key = "typing") {
-                        TypingIndicator()
-                    }
+                    item(key = "typing") { TypingIndicator() }
                 }
             }
         }

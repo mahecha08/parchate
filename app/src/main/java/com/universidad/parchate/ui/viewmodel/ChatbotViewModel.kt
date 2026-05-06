@@ -1,11 +1,13 @@
 package com.universidad.parchate.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.universidad.parchate.data.model.Evento
 import com.universidad.parchate.data.repository.EventRepository
+import com.universidad.parchate.data.repository.LocationRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +36,8 @@ data class ChatMessage(
 data class ChatbotUiState(
     val messages: List<ChatMessage> = emptyList(),
     val isTyping: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val hasLocation: Boolean = false
 )
 
 @Serializable
@@ -50,33 +53,39 @@ private data class EventoResumen(
     val precio: Double?,
     val gratis: Boolean,
     val modalidad: String,
-    val etiquetas: List<String>
+    val etiquetas: List<String>,
+    val latitud: Double?,
+    val longitud: Double?
 )
 
 @Serializable
 private data class ChatApiRequest(
     @SerialName("user_id") val userId: String,
     val message: String,
-    val eventos: List<EventoResumen>
+    val eventos: List<EventoResumen>,
+    @SerialName("user_lat") val userLat: Double? = null,
+    @SerialName("user_lng") val userLng: Double? = null
 )
 
 @Serializable
-private data class ChatApiResponse(
-    val reply: String
-)
+private data class ChatApiResponse(val reply: String)
 
-class ChatbotViewModel(
-    private val eventRepository: EventRepository = EventRepository(),
+class ChatbotViewModel(application: Application) : AndroidViewModel(application) {
+
     // Emulador: 10.0.2.2 | Dispositivo físico: IP local del PC (ej. 192.168.x.x)
-    private val baseUrl: String = "http://10.0.2.2:8000"
-) : ViewModel() {
+    private val baseUrl = "http://10.0.2.2:8000"
 
     private val _uiState = MutableStateFlow(ChatbotUiState())
     val uiState: StateFlow<ChatbotUiState> = _uiState.asStateFlow()
 
     private var nextId = 1L
     private var cachedEvents: List<Evento> = emptyList()
+    private var userLat: Double? = null
+    private var userLng: Double? = null
     private val userId = Firebase.auth.currentUser?.uid ?: "anon_${System.currentTimeMillis()}"
+
+    private val locationRepository = LocationRepository(application)
+    private val eventRepository = EventRepository()
 
     private val http = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
@@ -89,7 +98,7 @@ class ChatbotViewModel(
         addMessage(
             ChatAuthor.Assistant,
             "¡Hola! Soy Parche, tu asistente de Parchate. " +
-                "Cuéntame qué tipo de plan buscas y te ayudo a encontrarlo entre los eventos disponibles."
+                "Cuéntame qué tipo de plan buscas y te ayudo a encontrarlo."
         )
         observeEvents()
     }
@@ -107,6 +116,15 @@ class ChatbotViewModel(
             eventRepository.observeActiveEvents().collect { result ->
                 result.onSuccess { events -> cachedEvents = events }
             }
+        }
+    }
+
+    fun fetchUserLocation() {
+        viewModelScope.launch {
+            val location = locationRepository.getCurrentLocation() ?: return@launch
+            userLat = location.latitude
+            userLng = location.longitude
+            _uiState.update { it.copy(hasLocation = true) }
         }
     }
 
@@ -149,12 +167,20 @@ class ChatbotViewModel(
                 precio = e.precio,
                 gratis = e.gratis,
                 modalidad = e.modalidad.ifBlank { "presencial" },
-                etiquetas = e.etiquetas
+                etiquetas = e.etiquetas,
+                latitud = e.latitud,
+                longitud = e.longitud
             )
         }
 
         val body = json.encodeToString(
-            ChatApiRequest(userId = userId, message = message, eventos = eventos)
+            ChatApiRequest(
+                userId = userId,
+                message = message,
+                eventos = eventos,
+                userLat = userLat,
+                userLng = userLng
+            )
         ).toRequestBody("application/json".toMediaType())
 
         val request = Request.Builder()
@@ -164,7 +190,7 @@ class ChatbotViewModel(
 
         val response = http.newCall(request).execute()
         if (!response.isSuccessful) throw Exception("HTTP ${response.code}")
-        val responseBody = response.body?.string() ?: throw Exception("Respuesta vacía del servidor")
+        val responseBody = response.body?.string() ?: throw Exception("Respuesta vacía")
         json.decodeFromString<ChatApiResponse>(responseBody).reply
     }
 }

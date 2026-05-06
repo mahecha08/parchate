@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,17 +28,22 @@ import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,26 +55,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.universidad.parchate.R
 import com.universidad.parchate.ui.theme.BackgroundPrincipal
 import com.universidad.parchate.ui.theme.RosadoNeon
 import com.universidad.parchate.ui.theme.TextoSecundario
-
-private enum class ChatAuthor {
-    Assistant,
-    User
-}
-
-private data class ChatPreviewMessage(
-    val id: Long,
-    val author: ChatAuthor,
-    val text: String
-)
+import com.universidad.parchate.ui.viewmodel.ChatAuthor
+import com.universidad.parchate.ui.viewmodel.ChatMessage
+import com.universidad.parchate.ui.viewmodel.ChatbotViewModel
 
 @Composable
 fun ChatbotScreen(
-    onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit = {},
+    vm: ChatbotViewModel = viewModel()
 ) {
+    val uiState by vm.uiState.collectAsState()
+    val listState = rememberLazyListState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var draftMessage by rememberSaveable { mutableStateOf("") }
+
     val quickPrompts = listOf(
         stringResource(R.string.chatbot_quick_gratis),
         stringResource(R.string.chatbot_quick_online),
@@ -75,68 +81,38 @@ fun ChatbotScreen(
         stringResource(R.string.chatbot_quick_bailar),
         stringResource(R.string.chatbot_quick_fin_semana)
     )
-    val initialMessages = listOf(
-        ChatPreviewMessage(
-            id = 1L,
-            author = ChatAuthor.Assistant,
-            text = stringResource(R.string.chatbot_bienvenida)
-        ),
-        ChatPreviewMessage(
-            id = 2L,
-            author = ChatAuthor.Assistant,
-            text = stringResource(R.string.chatbot_bienvenida_extra)
-        )
-    )
-    val previewGratis = stringResource(R.string.chatbot_preview_gratis)
-    val previewOnline = stringResource(R.string.chatbot_preview_online)
-    val previewCerca = stringResource(R.string.chatbot_preview_cerca)
-    val previewBailar = stringResource(R.string.chatbot_preview_bailar)
-    val previewFinDeSemana = stringResource(R.string.chatbot_preview_fin_semana)
-    val previewDefault = stringResource(R.string.chatbot_preview_default)
-    val messages = remember {
-        mutableStateListOf<ChatPreviewMessage>().apply {
-            addAll(initialMessages)
-        }
+
+    // Scroll to bottom when messages change or typing starts
+    LaunchedEffect(uiState.messages.size, uiState.isTyping) {
+        val lastIndex = uiState.messages.size - 1 + if (uiState.isTyping) 1 else 0
+        if (lastIndex >= 0) listState.animateScrollToItem(lastIndex)
     }
-    var nextMessageId by remember { mutableStateOf(3L) }
-    var draftMessage by rememberSaveable { mutableStateOf("") }
 
-    fun submitPrompt(prompt: String) {
-        val cleanPrompt = prompt.trim()
-        if (cleanPrompt.isBlank()) return
-
-        messages.add(
-            ChatPreviewMessage(
-                id = nextMessageId++,
-                author = ChatAuthor.User,
-                text = cleanPrompt
-            )
-        )
-        messages.add(
-            ChatPreviewMessage(
-                id = nextMessageId++,
-                author = ChatAuthor.Assistant,
-                text = previewResponseFor(
-                    prompt = cleanPrompt,
-                    previewGratis = previewGratis,
-                    previewOnline = previewOnline,
-                    previewCerca = previewCerca,
-                    previewBailar = previewBailar,
-                    previewFinDeSemana = previewFinDeSemana,
-                    previewDefault = previewDefault
-                )
-            )
-        )
+    // Show error in snackbar
+    LaunchedEffect(uiState.error) {
+        val error = uiState.error ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(error)
+        vm.clearError()
     }
 
     Scaffold(
         containerColor = BackgroundPrincipal,
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = Color(0xFF3A1A2E),
+                    contentColor = Color.White
+                )
+            }
+        },
         bottomBar = {
             ChatInputBar(
                 value = draftMessage,
                 onValueChange = { draftMessage = it },
+                enabled = !uiState.isTyping,
                 onSend = {
-                    submitPrompt(draftMessage)
+                    vm.sendMessage(draftMessage)
                     draftMessage = ""
                 }
             )
@@ -147,6 +123,7 @@ fun ChatbotScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -189,6 +166,7 @@ fun ChatbotScreen(
                 }
             }
 
+            // AI status card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -217,13 +195,13 @@ fun ChatbotScreen(
 
                     Column {
                         Text(
-                            text = "Modo demo",
+                            text = stringResource(R.string.chatbot_ia_titulo),
                             color = Color.White,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = stringResource(R.string.chatbot_estado_demo),
+                            text = stringResource(R.string.chatbot_ia_subtitulo),
                             color = TextoSecundario,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -233,6 +211,7 @@ fun ChatbotScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
+            // Quick prompts
             Text(
                 text = stringResource(R.string.chatbot_sugerencias),
                 color = Color.White,
@@ -248,23 +227,34 @@ fun ChatbotScreen(
             ) {
                 items(quickPrompts, key = { it }) { prompt ->
                     AssistChip(
-                        onClick = { submitPrompt(prompt) },
-                        label = { Text(prompt) }
+                        onClick = {
+                            vm.sendMessage(prompt)
+                        },
+                        label = { Text(prompt) },
+                        enabled = !uiState.isTyping
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Messages
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                items(messages, key = { it.id }) { message ->
+                items(uiState.messages, key = { it.id }) { message ->
                     ChatBubble(message = message)
+                }
+
+                if (uiState.isTyping) {
+                    item(key = "typing") {
+                        TypingIndicator()
+                    }
                 }
             }
         }
@@ -272,10 +262,9 @@ fun ChatbotScreen(
 }
 
 @Composable
-private fun ChatBubble(message: ChatPreviewMessage) {
+private fun ChatBubble(message: ChatMessage) {
     val isAssistant = message.author == ChatAuthor.Assistant
     val bubbleColor = if (isAssistant) Color(0xFF2A2746) else RosadoNeon
-    val textColor = Color.White
     val bubbleShape = if (isAssistant) {
         RoundedCornerShape(topStart = 8.dp, topEnd = 24.dp, bottomEnd = 24.dp, bottomStart = 24.dp)
     } else {
@@ -308,11 +297,11 @@ private fun ChatBubble(message: ChatPreviewMessage) {
             color = bubbleColor,
             shape = bubbleShape,
             tonalElevation = if (isAssistant) 0.dp else 2.dp,
-            modifier = Modifier.fillMaxWidth(if (isAssistant) 0.86f else 0.78f)
+            modifier = Modifier.widthIn(max = if (isAssistant) 300.dp else 260.dp)
         ) {
             Text(
                 text = message.text,
-                color = textColor,
+                color = Color.White,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
             )
@@ -321,9 +310,53 @@ private fun ChatBubble(message: ChatPreviewMessage) {
 }
 
 @Composable
+private fun TypingIndicator() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .background(RosadoNeon.copy(alpha = 0.12f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.SmartToy,
+                contentDescription = null,
+                tint = RosadoNeon,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        Surface(
+            color = Color(0xFF2A2746),
+            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 24.dp, bottomEnd = 24.dp, bottomStart = 24.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(14.dp),
+                    color = RosadoNeon,
+                    strokeWidth = 2.dp
+                )
+                Text(
+                    text = "Parche está pensando…",
+                    color = TextoSecundario,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun ChatInputBar(
     value: String,
     onValueChange: (String) -> Unit,
+    enabled: Boolean,
     onSend: () -> Unit
 ) {
     Surface(
@@ -340,6 +373,7 @@ private fun ChatInputBar(
                 value = value,
                 onValueChange = onValueChange,
                 modifier = Modifier.weight(1f),
+                enabled = enabled,
                 placeholder = {
                     Text(
                         text = stringResource(R.string.chatbot_input),
@@ -351,6 +385,7 @@ private fun ChatInputBar(
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFF25223C),
                     unfocusedContainerColor = Color(0xFF25223C),
+                    disabledContainerColor = Color(0xFF1E1B30),
                     focusedIndicatorColor = RosadoNeon,
                     unfocusedIndicatorColor = RosadoNeon.copy(alpha = 0.45f),
                     focusedTextColor = Color.White,
@@ -364,7 +399,7 @@ private fun ChatInputBar(
             Surface(
                 onClick = onSend,
                 shape = CircleShape,
-                color = RosadoNeon,
+                color = if (enabled) RosadoNeon else RosadoNeon.copy(alpha = 0.4f),
                 modifier = Modifier.size(54.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -376,27 +411,5 @@ private fun ChatInputBar(
                 }
             }
         }
-    }
-}
-
-private fun previewResponseFor(
-    prompt: String,
-    previewGratis: String,
-    previewOnline: String,
-    previewCerca: String,
-    previewBailar: String,
-    previewFinDeSemana: String,
-    previewDefault: String
-): String {
-    val normalizedPrompt = prompt.lowercase()
-    return when {
-        "gratis" in normalizedPrompt -> previewGratis
-        "online" in normalizedPrompt || "virtual" in normalizedPrompt -> previewOnline
-        "cerca" in normalizedPrompt || "ubic" in normalizedPrompt || "mapa" in normalizedPrompt ->
-            previewCerca
-        "bail" in normalizedPrompt || "rumba" in normalizedPrompt || "fiesta" in normalizedPrompt ->
-            previewBailar
-        "fin" in normalizedPrompt || "semana" in normalizedPrompt -> previewFinDeSemana
-        else -> previewDefault
     }
 }

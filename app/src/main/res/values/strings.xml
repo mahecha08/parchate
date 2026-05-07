@@ -205,4 +205,20 @@
     <string name="map_label_lugar">Lugar: %1$s</string>
     <string name="map_event_open_location">Ver en mapa</string>
     <string name="create_hora_helper">HH:MM</string>
+
+    <string name="password_titulo">Cambiar Contraseña</string>
+    <string name="password_actual_label">Contraseña Actual</string>
+    <string name="password_nueva_label">Nueva Contraseña</string>
+    <string name="password_confirmar_label">Confirmar Nueva Contraseña</string>
+    <string name="password_ingresa_actual">Por favor ingrese su contraseña actual</string>
+    <string name="password_ingresa_nueva">Por favor ingrese su nueva contraseña</string>
+    <string name="password_ingresa_confirmar">Por favor confirme su nueva contraseña</string>
+    <string name="password_no_coinciden">Las contraseñas no coinciden</string>
+    <string name="password_actual_incorrecta">La contraseña actual es incorrecta</string>
+    <string name="password_cambiar">Cambiar Contraseña</string>
+    <string name="password_cambiado_exitoso">Contraseña cambiada exitosamente</string>
+    <string name="error_usuario_no_autenticado">Usuario no autenticado</string>
+    <string name="chatbot_initial_message">¡Hola! Soy Parche, tu asistente de Parchate. Cuéntame qué tipo de plan buscas y te ayudo a encontrarlo.</string>
+    <string name="chatbot_error_no_connection">⚠️ No pude conectarme. Verifica tu conexión a internet e intenta de nuevo.</string>
+    <string name="chatbot_typing_indicator">Parche está pensando…</string>
 </resources>

@@ -107,7 +107,7 @@ fun ProfileScreen(
 
             CajaBoton(text = stringResource(R.string.profile_datos_personales),onClick = onNavitageToEdit, leadingIcon = Icons.Default.AccountCircle, modifier = Modifier.padding(vertical = 12.dp))
             CajaBoton(text = stringResource(R.string.profile_tus_eventos),onClick = onNavigateToEvents, leadingIcon = Icons.Default.CalendarMonth, modifier = Modifier.padding(vertical = 12.dp))
-            CajaBoton(text = stringResource(R.string.profile_cambiar_contrasena),onClick = {}, leadingIcon = Icons.Default.Lock, modifier = Modifier.padding(vertical = 12.dp))
+            CajaBoton(text = stringResource(R.string.profile_cambiar_contrasena),onClick = onNavigateToChangePassword, leadingIcon = Icons.Default.Lock, modifier = Modifier.padding(vertical = 12.dp))
             CajaBoton(text = stringResource(R.string.profile_cerrar_sesion),onClick = {
                 Firebase.auth.signOut()
                 onNavigateToStart()

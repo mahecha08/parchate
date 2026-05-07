@@ -15,6 +15,7 @@ import com.universidad.parchate.ui.screens.Login.RegisterScreen
 import com.universidad.parchate.ui.screens.Login.VerificationCodeScreen
 import com.universidad.parchate.ui.screens.Profile.EditProfileScreen
 import com.universidad.parchate.ui.screens.Profile.ProfileScreen
+import com.universidad.parchate.ui.screens.Profile.ChangePasswordScreen
 import com.universidad.parchate.ui.screens.chat.ChatbotScreen
 import com.universidad.parchate.ui.screens.create.CreateEventScreen
 import com.universidad.parchate.ui.screens.map.EventsMapScreen
@@ -34,6 +35,7 @@ object Routes {
     const val MAP_PICKER = "map_picker"
     const val EVENTS_MAP = "events_map"
     const val CHATBOT = "chatbot"
+    const val CHANGE_PASSWORD = "change_password"
 }
 
 @Composable
@@ -234,7 +236,9 @@ fun NavigationPantallas() {
                 onNavigateToEvents = {
                     navController.navigate(ViewMyEvents)
                 },
-                onNavigateToChangePassword = { },
+                onNavigateToChangePassword = {
+                    navController.navigate(Routes.CHANGE_PASSWORD)
+                },
                 onNavigateToStart = {
                     val startDestinationId = navController.graph.startDestinationId
                     navController.navigate(Routes.START) {
@@ -249,6 +253,12 @@ fun NavigationPantallas() {
                 OnNavigateToProfile = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable(Routes.CHANGE_PASSWORD) {
+            ChangePasswordScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

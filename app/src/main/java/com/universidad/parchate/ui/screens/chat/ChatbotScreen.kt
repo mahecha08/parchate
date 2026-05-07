@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -241,6 +242,11 @@ fun ChatbotScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
+            val chipColors = AssistChipDefaults.assistChipColors(
+                containerColor = RosadoNeon,
+                labelColor = Color.White
+            )
+
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp)
@@ -249,7 +255,8 @@ fun ChatbotScreen(
                     AssistChip(
                         onClick = { vm.sendMessage(prompt) },
                         label = { Text(prompt) },
-                        enabled = !uiState.isTyping
+                        enabled = !uiState.isTyping,
+                        colors = chipColors
                     )
                 }
             }
@@ -358,7 +365,7 @@ private fun TypingIndicator() {
                     strokeWidth = 2.dp
                 )
                 Text(
-                    text = "Parche está pensando…",
+                    text = stringResource(R.string.chatbot_typing_indicator),
                     color = TextoSecundario,
                     style = MaterialTheme.typography.bodySmall
                 )

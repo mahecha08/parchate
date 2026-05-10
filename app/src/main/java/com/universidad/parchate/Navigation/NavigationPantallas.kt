@@ -5,6 +5,7 @@ import androidx.navigation.toRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.universidad.parchate.ui.screens.Event.EventDetailScreen
 import com.universidad.parchate.ui.screens.Event.MyEventsScreen
 import com.universidad.parchate.ui.screens.Event.UpdateEventScreen
 import com.universidad.parchate.ui.screens.Favorites.FavoritesScreen
@@ -139,6 +140,9 @@ fun NavigationPantallas() {
                 },
                 onNavigateToFavorites = {
                     navController.navigate(Favorites)
+                },
+                onNavigateToDetail = { eventId ->
+                    navController.navigate(EventDetail(eventId = eventId))
                 }
             )
         }
@@ -280,7 +284,10 @@ fun NavigationPantallas() {
         }
         composable<Calendar> {
             CalendarScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDetail = { eventId ->
+                    navController.navigate(EventDetail(eventId = eventId))
+                }
             )
         }
 
@@ -288,7 +295,17 @@ fun NavigationPantallas() {
         composable<Favorites> {
             FavoritesScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToDetail = { }
+                onNavigateToDetail = { eventId ->
+                    navController.navigate(EventDetail(eventId = eventId))
+                }
+            )
+        }
+
+        composable<EventDetail> { backStackEntry ->
+            val args = backStackEntry.toRoute<EventDetail>()
+            EventDetailScreen(
+                eventId = args.eventId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

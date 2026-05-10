@@ -62,7 +62,7 @@ private data class GroqResponse(val choices: List<GroqChoice>)
 class ChatbotViewModel(application: Application) : AndroidViewModel(application) {
 
     // Obtén tu key gratis en console.groq.com → Create API Key
-    private val groqApiKey = "key aca"
+    private val groqApiKey = "Tu_key"
     private val groqUrl = "https://api.groq.com/openai/v1/chat/completions"
     private val groqModel = "llama-3.1-8b-instant"
 

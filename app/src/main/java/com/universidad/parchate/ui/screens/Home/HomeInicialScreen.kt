@@ -68,6 +68,7 @@ fun HomeScreen(
     onNavigateToCalendar: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
+    onNavigateToDetail: (String) -> Unit = {},
     viewModel: HomeViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -309,7 +310,7 @@ fun HomeScreen(
                         items(uiState.filteredEvents, key = { it.id }) { evento ->
                             EventCard(
                                 evento = evento,
-                                onDetailClick = { },
+                                onDetailClick = { onNavigateToDetail(evento.id) },
                                 isFavorite = evento.id in uiState.favoriteEventIds,
                                 onFavoriteClick = { viewModel.toggleFavorite(evento.id) }
                             )

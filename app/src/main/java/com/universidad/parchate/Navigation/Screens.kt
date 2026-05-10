@@ -19,3 +19,6 @@ object Favorites
 
 @Serializable
 data class UpdateEvent(val eventId: String)
+
+@Serializable
+data class EventDetail(val eventId: String)

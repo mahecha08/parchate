@@ -35,7 +35,7 @@ import com.universidad.parchate.R
 @Composable
 fun FavoritesScreen(
     onNavigateBack: () -> Unit = {},
-    onNavigateToDetail: () -> Unit = {},
+    onNavigateToDetail: (String) -> Unit = {},
     viewModel: HomeViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -96,7 +96,7 @@ fun FavoritesScreen(
                             evento = evento,
                             isFavorite = true,
                             onFavoriteClick = { viewModel.toggleFavorite(evento.id) },
-                            onDeleteClick = { }
+                            onDeleteClick = { onNavigateToDetail(evento.id) }
                         )
                     }
                 }
